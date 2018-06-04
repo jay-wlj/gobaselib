@@ -1,0 +1,129 @@
+package gobaselib
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"reflect"
+	"strconv"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jie123108/glog"
+	
+	//"github.com/json-iterator/go"
+	//"unsafe"
+)
+
+func GetUri(c *gin.Context) string {
+	uri := c.Request.RequestURI
+
+	pos := strings.Index(uri, "?")
+	if pos >= 0 && pos < len(uri) {
+		uri = uri[0:pos]
+	}
+	return uri
+}
+
+func CheckQueryStringField(c *gin.Context, key string) (value string, err error) {
+	strvalue := c.Query(key)
+	return strvalue, nil
+}
+
+func CheckQueryIntField(c *gin.Context, key string) (value int, err error) {
+	strvalue := c.Query(key)
+	if 0 == len(strvalue) {
+		value = 0
+		err = fmt.Errorf("ERR_ARGS_MISSING")
+		return
+	}
+	value, err = strconv.Atoi(strvalue)
+	return
+}
+
+func CheckQueryIntDefaultField(c *gin.Context, key string, def int) (value int, err error) {
+	strvalue := c.Query(key)
+	if 0 == len(strvalue) {
+		value = def
+		err = fmt.Errorf("ERR_ARGS_MISSING")
+		return
+	}
+	value, err = strconv.Atoi(strvalue)
+	return
+}
+
+func CheckQueryInt64Field(c *gin.Context, key string) (value int64, err error) {
+	strvalue := c.Query(key)
+	if 0 == len(strvalue) {
+		value = 0
+		err = fmt.Errorf("ERR_ARGS_MISSING")
+		return
+	}
+	value, err = strconv.ParseInt(strvalue, 10, 64)
+	return
+}
+
+func CheckQueryBoolField(c *gin.Context, key string) (value bool, err error) {
+	strvalue := c.Query(key)
+	if 0 == len(strvalue) {
+		value = false
+		err = fmt.Errorf("ERR_ARGS_MISSING")
+		return
+	}
+	value, err = strconv.ParseBool(strvalue)
+	return
+}
+
+func GetPostJsonData(c *gin.Context) ([]byte, error) {
+	body, exists := c.Get("viewbody")
+	buf := []byte{}
+	var err error
+	if !exists {
+		raw_body := c.Request.Body
+		buf, err = ioutil.ReadAll(raw_body)
+	} else {
+		buf = body.([]byte)
+	}
+	return buf, err
+}
+
+func CheckQueryJsonField(c *gin.Context, stu interface{}) error {
+	buf, err := GetPostJsonData(c)
+
+	if err == nil {
+		glog.Error("uri:%v buf:%v", GetUri(c), string(buf))
+		err = json.Unmarshal(buf, stu)
+		//err = jsoniter.Unmarshal(buf, stu)
+		if err != nil {
+			post_form := c.Request.PostForm
+			form := c.Request.Form
+			glog.Errorf("1. try Invalid body[%v] postform[%v] form[%v], err: %v", string(buf), post_form, form, err)
+		}
+	} else {
+		glog.Errorf("2. try  Invalid body[%v] err: %v", string(buf), err)
+	}
+
+	return err
+}
+
+//检测必须的字段是否为空，若都不为空则返回true,反之为false
+func CheckNilField(info interface{}, fields []string) (ret bool) {
+	defer func() {
+		if err := recover(); err != nil {
+			glog.Errorf("%v", err)
+			ret = true
+		}
+	}()
+	v := reflect.ValueOf(info)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	for _, k := range fields {
+		one := v.FieldByName(k)
+		if !one.IsValid() || one.Interface() == reflect.Zero(one.Type()).Interface() {
+			glog.Errorf("field %s is nil", k)
+			return false
+		}
+	}
+	return true
+}
