@@ -6,8 +6,7 @@ import (
 	"github.com/jie123108/glog"
 	//"strings"
 	base "gobaselib"
-	. "gobaselib/common"
-	//"time"
+	"time"
 )
 
 // http://www.gorillatoolkit.org/pkg/context
@@ -15,12 +14,12 @@ import (
 type ApiTokenConfig struct {
 	Debug          bool
 	CheckSign      bool
-	// AccountServer  string
-	// AccountTimeout time.Duration
+	AccountServer  string
+	AccountTimeout time.Duration
 	NeedTokenList  map[string]bool
 }
 
-var TokenConfig ApiTokenConfig = ApiTokenConfig{false, true, make(map[string]bool)}
+var TokenConfig ApiTokenConfig = ApiTokenConfig{false, true, "http://127.0.0.1:810", 5 * time.Second, make(map[string]bool)}
 
 func token_check(c *gin.Context) bool {
 	c.Request.ParseForm()
@@ -29,7 +28,7 @@ func token_check(c *gin.Context) bool {
 	headers := c.Request.Header
 	// app_key := common.Config.AppKey
 
-	req_tokens := headers["X-Mt-Uid"]
+	req_tokens := headers["X-Mt-Token"]
 	if len(req_tokens) != 1 {
 		glog.Errorf("find %d Token value..", len(req_tokens))
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})
@@ -37,15 +36,18 @@ func token_check(c *gin.Context) bool {
 		return false
 	}
 
-	str_user_id := req_tokens[0]
-	user_id, err := base.StringToInt64(str_user_id)
+	token := req_tokens[0]
+	glog.Infof("req_token: %s", token)
+	// Check Token from account
+	user_id, user_type, _, err := TokenCheck(TokenConfig.AccountServer, token, TokenConfig.AccountTimeout)
 	if err != nil {
-		glog.Errorf("user_id is invalid value:", str_user_id)
+		glog.Errorf("CheckToken(%s) failed! timeout:%v err: %v", token, TokenConfig.AccountTimeout, err)
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})
 		c.Abort()
+		return false
 	}
 	c.Set("user_id", user_id)
-
+	c.Set("user_type", user_type)
 	return true
 }
 
@@ -70,7 +72,6 @@ func Token_Check(c *gin.Context) {
 		app_id := app_ids[0]
 		c.Set("app_id", app_id)
 	}
-
 
 	//if TokenConfig.CheckSign {
 	token_check(c)

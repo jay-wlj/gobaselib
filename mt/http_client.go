@@ -1,4 +1,4 @@
-package yf
+package mt
 
 import (
 	"fmt"
@@ -27,12 +27,12 @@ func ParseArgs(uri string) (args map[string]string) {
 	return
 }
 
-func YfHttpPost(uri string, body []byte, headers map[string]string, timeout time.Duration, app_key string) *base.OkJson {
+func YgHttpPost(uri string, body []byte, headers map[string]string, timeout time.Duration, app_key string) *base.OkJson {
 	signature, SignStr := "", ""
 	if app_key != "" {
 		args := ParseArgs(uri)
 		signature, SignStr = Sign2(uri, args, headers, body, app_key)
-		headers["X-YF-SIGN"] = signature
+		headers["X-Mt-SIGN"] = signature
 	}
 
 	res := base.HttpPostJson(uri, body, headers, timeout)
@@ -48,7 +48,7 @@ func YfHttpGet(uri string, headers map[string]string, timeout time.Duration, app
 	if app_key != "" {
 		args := ParseArgs(uri)
 		signature, SignStr = Sign2(uri, args, headers, nil, app_key)
-		headers["X-YF-SIGN"] = signature
+		headers["X-Mt-SIGN"] = signature
 	}
 
 	res := base.HttpGetJson(uri, headers, timeout)
@@ -64,7 +64,7 @@ func CachedNfHttpGet(client *base.RedisHttpClient, exptime time.Duration, uri st
 	if app_key != "" {
 		args := ParseArgs(uri)
 		signature, SignStr = Sign2(uri, args, headers, nil, app_key)
-		headers["X-YF-SIGN"] = signature
+		headers["X-Mt-SIGN"] = signature
 	}
 
 	res := client.HttpGetJson(uri, headers, timeout, exptime)

@@ -1,12 +1,13 @@
 package mt
 
 import (
+	"io/ioutil"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
-	"io/ioutil"
 	//"strings"
 	base "gobaselib"
-	. "gobaselib/common"
+	// . "gobaselib/common"
 )
 
 type ApiSignConfig struct {
@@ -17,7 +18,7 @@ type ApiSignConfig struct {
 	IgnoreSignList map[string]bool
 }
 
-var SignConfig ApiSignConfig = ApiSignConfig{false, true, "62361670a0b60c852fcc1e69189c233e", make(map[string]string), make(map[string]bool)}
+var SignConfig ApiSignConfig = ApiSignConfig{false, true, "eba0cb9dc8cffd641be5d01969674a30", make(map[string]string), make(map[string]bool)}
 
 func (this *ApiSignConfig) GetSignKey(appid string) string {
 	return this.AppKeys[appid]
@@ -82,13 +83,13 @@ func Sign_Check(c *gin.Context) {
 	body := []byte("")
 	if c.Request.Method == "POST" || c.Request.Method == "PUT" {
 		body, _ = ioutil.ReadAll(c.Request.Body)
-		c.Set("viewbody", body)
+		c.Set("body", body)
 	}
 
 	if SignConfig.CheckSign && !SignConfig.IgnoreSignList[uri] {
 		ApiSignCheck(c, body)
 	}
-	
+
 	c.Next()
 
 	//context.Clear(c.Request)

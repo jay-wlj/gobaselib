@@ -1,4 +1,4 @@
-package yf
+package mt
 
 import (
 	// "fmt"
@@ -21,10 +21,10 @@ func TestCachedHttpGet(t *testing.T) {
 	app_key := "786f0897555b057037aa44714890260b"
 	headers := make(map[string]string)
 	headers["Host"] = "f-api.nicefilm.com"
-	headers["X-YF-AppId"] = "api_v2"
-	headers["X-YF-rid"] = "1"
-	headers["X-YF-Platform"] = "test"
-	headers["X-YF-Version"] = "1.5.0"
+	headers["X-Mt-AppId"] = "api_v2"
+	headers["X-Mt-rid"] = "1"
+	headers["X-Mt-Platform"] = "test"
+	headers["X-Mt-Version"] = "1.5.0"
 	headers["X-Key"] = "fid:109852"
 	res := CachedNfHttpGet(client, time.Second*50, uri, headers, time.Second*1, app_key)
 	t.Logf("111 ok: %v, cached: %v, cost: %v", res.Ok, res.Cached, res.Stats.All)
