@@ -75,7 +75,7 @@ func CheckQueryBoolField(c *gin.Context, key string) (value bool, err error) {
 }
 
 func GetPostJsonData(c *gin.Context) ([]byte, error) {
-	body, exists := c.Get("viewbody")
+	body, exists := c.Get("body")
 	buf := []byte{}
 	var err error
 	if !exists {

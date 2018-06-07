@@ -7,6 +7,7 @@ import (
 	//"strings"
 	base "gobaselib"
 	"time"
+	"strconv"
 )
 
 // http://www.gorillatoolkit.org/pkg/context
@@ -28,26 +29,33 @@ func token_check(c *gin.Context) bool {
 	headers := c.Request.Header
 	// app_key := common.Config.AppKey
 
-	req_tokens := headers["X-Mt-Token"]
+	req_tokens := headers["X-Mt-Uid"]
 	if len(req_tokens) != 1 {
-		glog.Errorf("find %d Token value..", len(req_tokens))
+		glog.Errorf("find %d Uid value..", len(req_tokens))
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})
 		c.Abort()
 		return false
 	}
 
-	token := req_tokens[0]
-	glog.Infof("req_token: %s", token)
-	// Check Token from account
-	user_id, user_type, _, err := TokenCheck(TokenConfig.AccountServer, token, TokenConfig.AccountTimeout)
-	if err != nil {
-		glog.Errorf("CheckToken(%s) failed! timeout:%v err: %v", token, TokenConfig.AccountTimeout, err)
+	user_id, err := strconv.ParseInt(req_tokens[0], 10, 64) 
+	if err !=nil {
+		glog.Errorf("find %d Uid value..", len(req_tokens))
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})
 		c.Abort()
 		return false
 	}
+	//token := req_tokens[0]
+	// glog.Infof("req_token: %s", token)
+	// // Check Token from account
+	// user_id, user_type, _, err := TokenCheck(TokenConfig.AccountServer, token, TokenConfig.AccountTimeout)
+	// if err != nil {
+	// 	glog.Errorf("CheckToken(%s) failed! timeout:%v err: %v", token, TokenConfig.AccountTimeout, err)
+	// 	c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})
+	// 	c.Abort()
+	// 	return false
+	// }
 	c.Set("user_id", user_id)
-	c.Set("user_type", user_type)
+	//c.Set("user_type", user_type)
 	return true
 }
 
