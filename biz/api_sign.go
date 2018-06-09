@@ -1,4 +1,4 @@
-package mt
+package biz
 
 import (
 	"bytes"
@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	
 )
 
 var pattern *regexp.Regexp = regexp.MustCompile("\\%[0-9A-Fa-f]{2}")

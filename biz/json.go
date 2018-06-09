@@ -1,24 +1,24 @@
-package mt
+package biz
 
 import (
 	"github.com/gin-gonic/gin"
 )
 
-func JsonOk(data interface{}) gin.H {
-	return gin.H{"ok": true, "reason": "", "data": data}
-}
+// func JsonOk(data interface{}) gin.H {
+// 	return gin.H{"ok": true, "reason": "", "data": data}
+// }
 
-func JsonFail(reason string) gin.H {
-	return gin.H{"ok": false, "reason": reason}
-}
+// func JsonFail(reason string) gin.H {
+// 	return gin.H{"ok": false, "reason": reason}
+// }
 
-func JSON_Ok(c *gin.Context, data interface{}) gin.H {
+func JsonOk(c *gin.Context, data interface{}) gin.H {
 	response := gin.H{"ok": true, "reason": "", "data": data}
 	JSON(c, 200, response)
 	return response
 }
 
-func JSON_Fail(c *gin.Context, reason string) gin.H {
+func JsonFail(c *gin.Context, reason string) gin.H {
 	response := gin.H{"ok": false, "reason": reason}
 	if reason == ERR_SERVER_ERROR {
 		JSON(c, 500, response)
