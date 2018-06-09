@@ -77,7 +77,7 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 	return true
 }
 
-func Sign_Check(c *gin.Context) {
+func SignCheck(c *gin.Context) {
 	uri := base.GetUri(c)
 
 	body := []byte("")

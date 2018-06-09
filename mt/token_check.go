@@ -6,8 +6,8 @@ import (
 	"github.com/jie123108/glog"
 	//"strings"
 	base "gobaselib"
-	"time"
 	"strconv"
+	"time"
 )
 
 // http://www.gorillatoolkit.org/pkg/context
@@ -37,8 +37,8 @@ func token_check(c *gin.Context) bool {
 		return false
 	}
 
-	user_id, err := strconv.ParseInt(req_tokens[0], 10, 64) 
-	if err !=nil {
+	user_id, err := strconv.ParseInt(req_tokens[0], 10, 64)
+	if err != nil {
 		glog.Errorf("find %d Uid value..", len(req_tokens))
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})
 		c.Abort()
@@ -59,7 +59,7 @@ func token_check(c *gin.Context) bool {
 	return true
 }
 
-func Token_Check(c *gin.Context) {
+func TokenCheckFilter(c *gin.Context) {
 	uri := base.GetUri(c)
 
 	if !TokenConfig.NeedTokenList[uri] || c.Request.Method == "OPTIONS" {
