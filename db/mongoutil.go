@@ -184,7 +184,9 @@ func (this *MongoDao) One(selector interface{}, fields interface{}, result inter
 	selected_query := query.Select(fields)
 
 	err = selected_query.One(result)
-
+	if err == mgo.ErrNotFound {
+		err = nil
+	}
 	return
 }
 
@@ -194,7 +196,9 @@ func (this *MongoDao) FindOne(selector interface{}, fields interface{}, result i
 	selected_query := query.Select(fields)
 
 	err = selected_query.One(result)
-
+	if err == mgo.ErrNotFound {
+		err = nil
+	}
 	return
 }
 

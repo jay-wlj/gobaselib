@@ -1,6 +1,7 @@
 package gobaselib
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -38,43 +39,12 @@ func Int64ToInt(val int64) (value int, err error) {
 	value, err = strconv.Atoi(strval)
 	return
 }
-func IntSliceToString(values []int, splite string) (strvalue string) {
-	bfirst := true
-	for _, value := range values {
-		if !bfirst {
-			strvalue += splite
-		} else {
-			bfirst = false
-		}
-		strvalue += IntToString(value)
-	}
-	return
+func IntSliceToString(values []int, delim string) (strvalue string) {
+	return strings.Trim(strings.Replace(fmt.Sprint(values), " ", delim, -1), "[]")
 }
 
-func StringSliceToString(values []string, splite string) (strvalue string) {
-	bfirst := true
-	for _, value := range values {
-		if !bfirst {
-			strvalue += splite
-		} else {
-			bfirst = false
-		}
-		strvalue += value
-	}
-	return
-}
-
-func Int64SliceToString(values []int64, splite string) (strvalue string) {
-	bfirst := true
-	for _, value := range values {
-		if !bfirst {
-			strvalue += splite
-		} else {
-			bfirst = false
-		}
-		strvalue += Int64ToString(value)
-	}
-	return
+func Int64SliceToString(values []int64, delim string) (strvalue string) {
+	return strings.Trim(strings.Replace(fmt.Sprint(values), " ", delim, -1), "[]")
 }
 
 func StringToIntSlice(str string, splite string) (ivalues []int) {

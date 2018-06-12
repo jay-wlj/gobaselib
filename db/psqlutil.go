@@ -1,204 +1,112 @@
 package db
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/jie123108/glog"
-	_ "github.com/lib/pq"
-	"gopkg.in/gorp.v1"
+	"github.com/jinzhu/gorm"
 )
 
-type PsqlDao struct {
-	psqlUrl  string
-	sqlDebug bool
-	dbMap    *gorp.DbMap
-	tx       *gorp.Transaction
-	useTx    bool
-}
-
-var m_psqlDb map[string]*sql.DB = make(map[string]*sql.DB)
-
-//var psqlDb *sql.DB
-
-func InitPsqlDb(psqlUrl string) (*sql.DB, error) {
-	if db, ok := m_psqlDb[psqlUrl]; ok {
-		return db, nil
-	}
-	//	if psqlDb != nil {
-	//		return psqlDb, nil
-	//	}
-
+func init_db(sql_url string, sql_debug bool) (db *gorm.DB) {
 	var err error
-	psqlDb, err := sql.Open("postgres", psqlUrl)
+	db, err = gorm.Open("postgres", sql_url)
 	if err != nil {
-		glog.Fatalf("open postgresql(%v) failed! err: %v", psqlUrl, err)
+		glog.Exitf("open psql(%s) failed! err: %v", sql_url, err)
+	} else {
+		glog.Infof("open psql(%s) ok!", sql_url)
 	}
-	fmt.Println("open sql ok")
-	m_psqlDb[psqlUrl] = psqlDb
-	glog.Infof("open psql(%s) ok!", psqlUrl)
-	return psqlDb, nil
+	// TODO: 数据库连接池相关参数设置。
+	// DB.SetConnMaxLifetime(d)
+	db.DB().SetMaxIdleConns(50)
+	db.DB().SetMaxOpenConns(100)
+
+	db.LogMode(sql_debug)
+
+	if sql_debug {
+		db.SetLogger(log.New(os.Stdout, "upload:", log.Lmicroseconds))
+	}
+
+	return
 }
 
-func NewPsqlDao(psqlUrl string, sqlDebug bool, tableName string, tablesu interface{}, isautoid bool, keys []string) (dao *PsqlDao, err error) {
-	dao = &PsqlDao{
-		psqlUrl:  psqlUrl,
-		sqlDebug: sqlDebug,
-	}
-	db, err := InitPsqlDb(psqlUrl)
-	if err != nil {
+var m_psqlDb map[string]*gorm.DB = make(map[string]*gorm.DB)
+
+func InitPsqlDb(psqlUrl string, sql_debug bool) (db *gorm.DB) {
+	var ok bool
+	if db, ok = m_psqlDb[psqlUrl]; ok {
 		return
 	}
 
-	if dao.dbMap == nil {
-		dao.dbMap = &gorp.DbMap{
-			Db:      db,
-			Dialect: gorp.PostgresDialect{},
-		}
-		if sqlDebug {
-			var traceon = "["
-			traceon += tableName
-			traceon += "dao]"
-			dao.dbMap.TraceOn(traceon, log.New(os.Stdout, "psql:", log.Lmicroseconds))
-		}
-	}
+	db = init_db(psqlUrl, sql_debug)
 
-	if len(tableName) > 0 {
-		dao.dbMap.AddTableWithName(tablesu, tableName).SetKeys(isautoid, keys...)
-	}
+	m_psqlDb[psqlUrl] = db
+	glog.Infof("open psql(%s) ok!", psqlUrl)
 	return
 }
 
-func (this *PsqlDao) AddTableWithName(tablestu interface{}, tablename string, isautoid bool, keys []string) {
-	//glog.Errorf("addtablewithname(%v)", tablename)
-	this.dbMap.AddTableWithName(tablestu, tablename).SetKeys(isautoid, keys...)
+type PsqlDao struct {
+	model    interface{}
+	psqlUrl  string
+	sqlDebug bool
+	db       *gorm.DB
+	useTx    bool
+}
+
+func NewPsqlDao(psqlUrl string, sqlDebug bool, model interface{}) (dao *PsqlDao) {
+	dao = &PsqlDao{model: model, psqlUrl: psqlUrl, sqlDebug: sqlDebug, db: InitPsqlDb(psqlUrl, sqlDebug)}
 	return
 }
 
-func (this *PsqlDao) Begin() (err error) {
-	this.tx, err = this.dbMap.Begin()
-	this.useTx = true
+func (this *PsqlDao) Insert(value interface{}) (err error) {
+	db := this.db.Create(value)
+	err = db.Error
 	return
 }
 
-func (this *PsqlDao) Commit() (err error) {
-	if this.useTx && this.tx != nil {
-		err = this.tx.Commit()
+func (this *PsqlDao) Upsert(obj interface{}) (err error, operator string) {
+	operator = "save"
+	err = this.db.Create(obj).Error
+	if err != nil && strings.Index(err.Error(), "#1062") > 0 {
+		operator = "update"
+		err = this.db.Model(this.model).Update(obj).Error
 	}
+
 	return
 }
 
-func (this *PsqlDao) Rollback() (err error) {
-	if this.useTx && this.tx != nil {
-		err = this.tx.Rollback()
-	}
+func (this *PsqlDao) Update(update interface{}, query interface{}, args ...interface{}) (err error) {
+	err = this.db.Model(this.model).Where(query, args).Update(update).Error
 	return
 }
 
-func (this *PsqlDao) Insert(obj interface{}) (err error) {
-	if this.useTx {
-		if this.tx == nil {
-			return fmt.Errorf("this.tx is nil")
-		}
-		err = this.tx.Insert(obj)
-	} else {
-		if this.dbMap == nil {
-			return fmt.Errorf("this.dbMap is nil")
-		}
-		err = this.dbMap.Insert(obj)
-	}
+func (this *PsqlDao) Find(result interface{}, query interface{}, args ...interface{}) (err error) {
+	err = this.db.Where(query, args).Find(result).Error
 	return
 }
 
-func (this *PsqlDao) Upsert(obj interface{}) (err error, effects int64, operator string) {
-	if this.useTx {
-		operator = "save"
-		if this.tx == nil {
-			return fmt.Errorf("this.dbMap is nil"), effects, operator
-		}
-		err = this.tx.Insert(obj)
-		if err != nil && strings.Index(err.Error(), "#1062") > 0 {
-			operator = "update"
-			effects, err = this.tx.Update(obj)
-		}
-	} else {
-		operator = "save"
-		if this.dbMap == nil {
-			return fmt.Errorf("this.dbMap is nil"), effects, operator
-		}
-		err = this.dbMap.Insert(obj)
-		if err != nil && strings.Index(err.Error(), "#1062") > 0 {
-			operator = "update"
-			effects, err = this.dbMap.Update(obj)
-		}
-	}
-	return err, effects, operator
-}
-
-func (this *PsqlDao) Update(obj interface{}) (err error, rows int64) {
-	if this.useTx {
-		if this.tx == nil {
-			return fmt.Errorf("this.db is nil"), 0
-		}
-		rows, err = this.tx.Update(obj)
-	} else {
-		if this.dbMap == nil {
-			return fmt.Errorf("this.db is nil"), 0
-		}
-		rows, err = this.dbMap.Update(obj)
-	}
-	return err, rows
-}
-
-func (this *PsqlDao) Exec(sqlstr string, args ...interface{}) (sql.Result, error) {
-	if this.useTx {
-		return this.tx.Exec(sqlstr, args...)
-	}
-	return this.dbMap.Exec(sqlstr, args...)
-}
-
-func (this *PsqlDao) Select(results interface{}, sql_select string, page int, page_size int, args ...interface{}) ([]interface{}, error) {
-	offset := 0
+func (this *PsqlDao) Find2(result interface{}, order_by interface{}, page int, page_size int, query interface{}, args ...interface{}) (err error) {
 	if page > 0 {
-		offset = (page - 1) * page_size
+		page = page - 1
 	}
-	if page_size > 0 {
-		sql_select += fmt.Sprintf(" limit %v offset %v", page_size, offset)
+	if page_size < 1 {
+		page_size = 1
 	}
-
-	if this.useTx {
-		return this.tx.Select(results, sql_select, args...)
-	}
-
-	return this.dbMap.Select(results, sql_select, args...)
-
+	offset := page * page_size
+	limit := page_size
+	err = this.db.Model(this.model).Where(query, args).Order(order_by).Offset(offset).Limit(limit).Find(result).Error
+	return
 }
 
-func (this *PsqlDao) SelectOne(result interface{}, sql_select string, args ...interface{}) error {
-	if this.useTx {
-		return this.tx.SelectOne(result, sql_select, args...)
-	}
-	return this.dbMap.SelectOne(result, sql_select, args...)
+func (this *PsqlDao) Get(result interface{}, query interface{}, args ...interface{}) (err error) {
+	err = this.db.Where(query, args).First(result).Error
+	return
 }
 
-type PsqlCountStruct struct {
-	Count int `json:"count" db:"count"`
-}
-
-func (this *PsqlDao) Count(sqlCount string) (int, error) {
-	total := 0
-	var err error
-	results := []PsqlCountStruct{}
-	_, err = this.Select(&results, sqlCount, 0, 0)
-
-	if err == nil {
-		if len(results) > 0 {
-			total = results[0].Count
-		}
-	}
-
-	return total, err
+func (this *PsqlDao) Exec(sql string, values ...interface{}) (affected_rows int64, err error) {
+	db := this.db.Exec(sql, values)
+	affected_rows = db.RowsAffected
+	err = db.Error
+	return
 }
