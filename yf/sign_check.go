@@ -71,7 +71,7 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 		if SignConfig.Debug && len(body) < 100 {
 			glog.Infof("body: [[%v]]", string(body))
 		}
-		c.JSON(401, gin.H{"ok": false, "reason": ERR_SIGN_ERROR, "SignStr": SignStr})
+		c.JSON(401, gin.H{"ok": false, "reason": ERR_SIGN_ERROR})
 		c.Abort()
 		return false
 	}

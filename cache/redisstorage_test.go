@@ -9,7 +9,7 @@ import (
 )
 
 
-type Comment struct {
+type comment struct {
     Id             int64       `json:"id,string" db:"id"`
     UserId         int64       `json:"user_id,string" db:"user_id"`
     Type           int         `json:"type" db:"type"`
@@ -17,34 +17,34 @@ type Comment struct {
     Comment        string      `json:"comment" db:"comment"`
 }
 
-func CommentGetID(obj interface{}) int64 {
-    comment := obj.(*Comment)
+func commentGetID(obj interface{}) int64 {
+    comment := obj.(*comment)
     return comment.Id
 }
 
-func CommentGetKey(id int64) string {
+func commentGetKey(id int64) string {
     return fmt.Sprintf("cmt:%d", id)
 }
 
-func IndexKey(type_ int, res_id int64) string {
+func indexKey(type_ int, res_id int64) string {
     return fmt.Sprintf("cidx:%d-%d", type_, res_id)
 }
 
-func CommentGetIndexKey(obj interface{}) string {
-    comment := obj.(*Comment)
-    return IndexKey(comment.Type, comment.ResId)
+func commentGetIndexKey(obj interface{}) string {
+    comment := obj.(*comment)
+    return indexKey(comment.Type, comment.ResId)
 }
 
-func CommentMarshal(obj interface{})([]byte, error) {
+func commentMarshal(obj interface{})([]byte, error) {
     return msgpack.Marshal(obj)
 }
 
-func CommentUnmarshal(data []byte, v interface{}) error {
+func commentUnmarshal(data []byte, v interface{}) error {
     return msgpack.Unmarshal(data, v)
 }
 
 
-func GetByPage(comments []*Comment, page int) (objs []*Comment, err error) {
+func getByPage(comments []*comment, page int) (objs []*comment, err error) {
     if page == 0 {
         page = (len(comments)-1)/10 + 1
     }
@@ -55,7 +55,7 @@ func GetByPage(comments []*Comment, page int) (objs []*Comment, err error) {
         e = len(comments)
     }
     objs = comments[b:e]
-    tmp := make([]*Comment, 0)
+    tmp := make([]*comment, 0)
     //倒序插入.
     for i := len(objs)-1;i >=0; i-- {
         obj := objs[i]
@@ -68,14 +68,14 @@ func GetByPage(comments []*Comment, page int) (objs []*Comment, err error) {
     if len(objs) == 0 {
         page = page -1
         if page > 0 {
-            return GetByPage(comments, page)
+            return getByPage(comments, page)
         }
     }
 
     return objs, nil
 }
 
-func GetTotal(comments []*Comment)(total int64) {
+func getTotal(comments []*comment)(total int64) {
     for i := len(comments)-1;i >=0; i-- {
         obj := comments[i]
         if obj.Id != -1 { //-1表示标记为删除
@@ -85,7 +85,7 @@ func GetTotal(comments []*Comment)(total int64) {
     return
 }
 
-func CommentsCompare(comments []interface{}, comments_expect []*Comment) (err error) {
+func commentsCompare(comments []interface{}, comments_expect []*comment) (err error) {
     exp_len := len(comments_expect)
     real_len := len(comments)
     if real_len !=  exp_len{
@@ -106,7 +106,7 @@ func CommentsCompare(comments []interface{}, comments_expect []*Comment) (err er
     return
 }
 
-func test_comments_del(comments []*Comment, id int64) {
+func test_comments_del(comments []*comment, id int64) {
     for i:=0;i<len(comments); i++ {
         if comments[i].Id == id {
             comments[i].Id = -1 //标记为-1表示删除
@@ -115,23 +115,23 @@ func test_comments_del(comments []*Comment, id int64) {
     }
 }
 
-func test_redis_list(t *testing.T, storage *RedisStorage, indexkey string, comments_all []*Comment) {
+func test_redis_list(t *testing.T, storage *RedisStorage, indexkey string, comments_all []*comment) {
     next_page := 0
     total_objs := 0
     for i:=0;i<len(comments_all)/10 + 3;i++ {
         cur_page := next_page
-        objs_expect, _ := GetByPage(comments_all, cur_page)
+        objs_expect, _ := getByPage(comments_all, cur_page)
         data, err := storage.List(indexkey, cur_page)
         if err != nil {
             t.Fatal(err)
         }
-        total_exp := GetTotal(comments_all)
+        total_exp := getTotal(comments_all)
         if data.Total != total_exp {
             t.Fatalf("total comments: %d, expect totals: %d", data.Total, total_exp)
         }
         next_page = data.NextPage
         total_objs += len(data.Objs)
-        err = CommentsCompare(data.Objs, objs_expect)
+        err = commentsCompare(data.Objs, objs_expect)
         if err != nil {
             t.Errorf("    objs: %v", data.Objs)
             t.Errorf("exp objs: %v", objs_expect)    
@@ -148,11 +148,11 @@ func test_redis_list(t *testing.T, storage *RedisStorage, indexkey string, comme
 }
 
 
-func TestRedisStorage(t *testing.T) {
+func testRedisStorage(t *testing.T) {
     cfg := &StorageConfig{}
-    objtype := reflect.TypeOf((*Comment)(nil)).Elem()
-    cb := &StorageCallback{CommentGetID, CommentGetKey, CommentGetIndexKey, CommentMarshal, 
-                CommentUnmarshal, objtype}
+    objtype := reflect.TypeOf((*comment)(nil)).Elem()
+    cb := &StorageCallback{commentGetID, commentGetKey, commentGetIndexKey, commentMarshal, 
+                commentUnmarshal, objtype}
     storage, err := NewRedisStorage(cfg, cb)
     if err != nil {
         t.Fatal(err)
@@ -160,20 +160,20 @@ func TestRedisStorage(t *testing.T) {
 
     type_ := 1
     ResId := int64(10)
-    indexkey := IndexKey(type_, ResId)
+    indexkey := indexKey(type_, ResId)
     _, err = storage.DelAllIndex(indexkey)
     if err != nil {
         t.Fatal(err)
     }
 
-    comments := make([]*Comment, 0)
+    comments := make([]*comment, 0)
     del_ids := make([]int64, 0)
 
     for i:=int64(1);i<46;i++ {
         Id := i
         UserId := i * 3
         comment := fmt.Sprintf("comment-%d-%d: %d", type_, ResId, Id)
-        commentInfo := &Comment{Id,UserId, type_, ResId, comment}
+        commentInfo := &comment{Id,UserId, type_, ResId, comment}
         err = storage.Add(commentInfo)
         if err != nil {
             t.Fatal(err)

@@ -6,10 +6,12 @@ import (
 	"strings"
 	"unsafe"
 	"math"
+	"fmt"
 	"encoding/json"
 )
 
 const FLOAT_MIN = 0.0000001
+const FLOAT_MIN_PRECISION = 7
 
 func StringToInt(str string) (value int, err error) {
 	value, err = strconv.Atoi(str)
@@ -132,6 +134,13 @@ func Version4ToInt(version string) int {
 		fix_data = fix_data / 100
 	}
 	return ver
+}
+
+// 获取保留n位小数的浮点型
+func Round2(f float64, n int) float64 {
+	floatStr := fmt.Sprintf("%."+strconv.Itoa(n)+"f", f)
+	inst, _ := strconv.ParseFloat(floatStr, 64)
+	return inst
 }
 
 // 判断分页是否末尾了

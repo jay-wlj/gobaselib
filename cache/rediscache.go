@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"time"
-
 	"github.com/jie123108/glog"
 	"gopkg.in/redis.v5"
 )
@@ -35,7 +34,6 @@ type RedisCache struct {
 
 func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 	cache = &RedisCache{}
-
 	cache.cacheName = cfg.CacheName
 	if cache.cacheName == "" {
 		cache.cacheName = fmt.Sprintf("redis_%s", cfg.Addr)
@@ -48,10 +46,11 @@ func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 	cache.client = redis.NewClient(&redis.Options{Addr: cfg.Addr, Password: cfg.Password, DB: cfg.DBIndex})
 	pong, err := cache.client.Ping().Result()
 	if err != nil {
-		glog.Errorf("NewRedisCache(%v,%v) failed! pong:%v err:%v", cfg.Addr, cfg.DBIndex, pong, err)
+		glog.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! pong:", pong, " err:", err)
 		cache = nil
 		return
 	}
+	
 
 	return
 }
@@ -102,12 +101,17 @@ func (this *RedisCache) HGetB(key, field string) (val []byte, err error) {
 	return
 }
 
+func (this *RedisCache) HGetF64(key, field string) (val float64, err error) {
+	val, err = this.client.HGet(key, field).Float64()
+	return
+}
+
 func (this *RedisCache) HSet(key, field string, value interface{}, exptime time.Duration) (err error) {
 	err = this.client.HSet(key, field, value).Err()
 	if err == nil && exptime > 0 {
 		err = this.client.Expire(key, exptime).Err()
 		if err != nil {
-			glog.Errorf("redis.Expire(%s, %v) failed! err:%v", key, exptime, err)
+			glog.Error("redis.Expire(", key, ", ", exptime, ") failed! err:", err)
 			err = nil
 		}
 	}
@@ -138,6 +142,7 @@ func (this *RedisCache) Eval(script string, keys []string, args ...interface{}) 
 	default:
 		fmt.Printf("unexpected type %T\n", t) // %T prints whatever type t has
 	}
+
 	return n, err
 }
 
@@ -193,6 +198,59 @@ func CacheQuery(in []reflect.Value) []reflect.Value {
 func MakeCacheQuery(fptr interface{}) {
 	fn := reflect.ValueOf(fptr).Elem()
 	v := reflect.MakeFunc(fn.Type(), CacheQuery)
+	fn.Set(v)
+}
+
+
+
+// in: this *RedisCache, hashcachekey, field string, exptime time.Duration, query_func QueryFunc, args... interface{}
+//out: val interface{}, err error, cached string
+func HCacheQuery(in []reflect.Value) []reflect.Value {
+	this, _ := in[0].Interface().(*RedisCache)
+
+	cached := "miss"
+	cachekey, _ := in[1].Interface().(string)
+	field, _ := in[2].Interface().(string)
+
+	exptime, _ := in[3].Interface().(time.Duration)
+	query_func := in[4]
+	args := in[5:]
+
+	str, err := this.HGet(cachekey, field)
+	if str != "" {
+		//回调函数第一个返回值是个对象.
+		ret_val_type := query_func.Type().Out(0)
+		//动态创建一个对象, 用于接收json数据.
+		val := reflect.New(ret_val_type)
+		//Unmarshal需要interface类型.
+		vali := val.Interface()
+		err = json.Unmarshal([]byte(str), &vali)
+		if err == nil {
+			cached = "hit"
+			// reflect.Indirect 将值得进行一次解引用.
+			return []reflect.Value{reflect.Indirect(val), reflect.Zero(errorType), reflect.ValueOf(cached)}
+		}
+	}
+
+	// 缓存中未查询到, 查询回调函数.
+	values := query_func.Call(args)
+	val := values[0].Interface()
+	err, _ = values[1].Interface().(error)
+	//查询成功, 缓存结果, 用于下次查询.
+	if err == nil && val != nil {
+		buf, err := json.Marshal(val)
+		if err == nil {
+			str = string(buf)
+			this.HSet(cachekey, field, str, exptime)
+		}
+	}
+
+	values = append(values, reflect.ValueOf(cached))
+	return values
+}
+func MakeHCacheQuery(fptr interface{}) {
+	fn := reflect.ValueOf(fptr).Elem()
+	v := reflect.MakeFunc(fn.Type(), HCacheQuery)
 	fn.Set(v)
 }
 

@@ -8,20 +8,20 @@ import (
 )
 
 
-func PerfCacheQuery(in []reflect.Value) []reflect.Value {
+func perfCacheQuery(in []reflect.Value) []reflect.Value {
     query_func := in[0]
     args := in[1:]
     values := query_func.Call(args)
     return values
 }
 
-func MakePerfCacheQuery(fptr interface{}){
+func makePerfCacheQuery(fptr interface{}){
     fn := reflect.ValueOf(fptr).Elem()
-    v := reflect.MakeFunc(fn.Type(), PerfCacheQuery)
+    v := reflect.MakeFunc(fn.Type(), perfCacheQuery)
     fn.Set(v)
 }
 
-type TestObject struct {
+type testObject struct {
     UserId int64
     Username string
     Sex bool
@@ -29,7 +29,7 @@ type TestObject struct {
     Avatar string
 }
 
-func GetById(obj_id int64) (obj *TestObject, err error){
+func getById(obj_id int64) (obj *testObject, err error){
     // objname := fmt.Sprintf("obj-%d", obj_id)
     // sex := obj_id % 2 == 0
     // age := int(obj_id % 60)
@@ -37,18 +37,18 @@ func GetById(obj_id int64) (obj *TestObject, err error){
     // obj = &TestObject{UserId: obj_id, Username: objname,
     //         Sex: sex, Age: age, Avatar: avatar}
 
-    obj = &TestObject{}
+    obj = &testObject{}
     return
 }
 
 var ObjectCacheQuery func (
-    func(int64) (*TestObject, error), int64) (*TestObject, error)
+    func(int64) (*testObject, error), int64) (*testObject, error)
 
 func init(){
-    MakePerfCacheQuery(&ObjectCacheQuery)
+    //makePerfCacheQuery(&ObjectCacheQuery)
 }
 
-func TestPerf(t *testing.T){
+func testPerf(t *testing.T){
     // var obj *TestObject 
     // var err error
     count := 10000*10
@@ -56,14 +56,14 @@ func TestPerf(t *testing.T){
 
     start := time.Now()
     for i:=0;i<count;i++ {
-        ObjectCacheQuery(GetById, obj_id)
+        ObjectCacheQuery(getById, obj_id)
     }
     end := time.Now()
     fmt.Printf("proxy used: %.3f\n", float64(end.Sub(start).Nanoseconds())/1000000000.0)
 
     start = time.Now()
     for i:=0;i<count;i++ {
-        GetById(obj_id)
+        getById(obj_id)
     }
     end = time.Now()
     fmt.Printf("raw used: %.3f\n", float64(end.Sub(start).Nanoseconds())/1000000000.0)

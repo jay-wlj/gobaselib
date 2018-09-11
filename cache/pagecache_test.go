@@ -9,12 +9,9 @@ var pct_cfg RedisConfig
 var test_page_size = 5
 var test_key = "gotest"
 
-func init() {
-   
-}
 
 
-func TestPageCache(t *testing.T) {
+func testPageCache(t *testing.T) {
     cache, err := NewPageCache(&pct_cfg, test_page_size)
     if err != nil {
         t.Fatal(err)
