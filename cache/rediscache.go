@@ -50,9 +50,18 @@ func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 		cache = nil
 		return
 	}
-	
 
 	return
+}
+
+
+func (this *RedisCache) Subscribe(channel ...string)(pub *redis.PubSub, err error) {
+	pub, err = this.client.Subscribe(channel...)		
+	return
+}
+
+func (this *RedisCache) Publish(channel, message string)(int64, error) {
+	return this.client.Publish(channel, message).Result()
 }
 
 // 如果key为 xxx->field, 将从hash中获取数据.
@@ -103,6 +112,11 @@ func (this *RedisCache) HGetB(key, field string) (val []byte, err error) {
 
 func (this *RedisCache) HGetF64(key, field string) (val float64, err error) {
 	val, err = this.client.HGet(key, field).Float64()
+	return
+}
+
+func (this *RedisCache)HGetAll(key string)(val map[string]string, err error) {
+	val, err = this.client.HGetAll(key).Result()
 	return
 }
 

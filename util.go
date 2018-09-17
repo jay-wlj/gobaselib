@@ -126,12 +126,12 @@ func Slice(s string) (b []byte) {
 
 func Version4ToInt(version string) int {
 	arr := strings.Split(version, ".")
-	fix_data := 100000000
+	fix_data := 1
 	ver := 0
-	for _, num := range arr {
-		d, _ := StringToInt(num)
-		ver = ver + d*fix_data
-		fix_data = fix_data / 100
+	for i:=len(arr)-1; i>=0; i-- {
+		d, _ := StringToInt(arr[i])
+		ver = ver + d * fix_data
+		fix_data *= 10000
 	}
 	return ver
 }
