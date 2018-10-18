@@ -3,10 +3,18 @@ package yf
 import (
 	"crypto/md5"
 	"crypto/sha1"
+	"crypto/sha256"
 	"fmt"
 	"io"
 	"os"
 )
+
+func Sha256hex(data []byte) string {
+	h := sha256.New()
+	h.Write(data)
+	bs := h.Sum(nil)
+	return fmt.Sprintf("%x", bs)
+}
 
 func Sha1hex(data []byte) string {
 	h := sha1.New()

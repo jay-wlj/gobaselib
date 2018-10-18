@@ -11,7 +11,7 @@ import (
 )
 
 const FLOAT_MIN = 0.0000001
-const FLOAT_MIN_PRECISION = 7
+const FLOAT_MIN_PRECISION = 8
 
 func StringToInt(str string) (value int, err error) {
 	value, err = strconv.Atoi(str)

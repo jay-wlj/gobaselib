@@ -15,6 +15,7 @@ const (
 	ERR_OBJECT_NOT_FOUND     string = "ERR_OBJECT_NOT_FOUND"	// 对象没找到
 	ERR_HTTP_FORBIDDEN       string = "ERR_HTTP_FORBIDDEN"		// http forbidden
 	ERR_ARGS_MISSING         string = "ERR_ARGS_MISSING"		// 参数缺失
+	ERR_NOT_FOUND			 string = "ERR_NOT_FOUND"			// 没有找到
 	DATA_NOT_MOTIFIED        string = "DATA_NOT_MOTIFIED"		// 数据不能修改
 	ERR_EMAIL_INVALID		string = "ERR_EMAIL_INVALID"		// 非法的邮箱地址
 	ERR_ACTION_UNSUPPORTED   string = "ERR_ACTION_UNSUPPORTED"	

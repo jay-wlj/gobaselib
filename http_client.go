@@ -215,15 +215,15 @@ func Http_req(method, uri string, body []byte, args map[string]string, headers m
 	url_with_args := req.URL.String()
 	req_debug := HttpReqDebug(method, url_with_args, body, headers, 1024)
 
-	glog.Infof("REQUEST [ %s ] timeout: %v", req_debug, timeout)
-	begin := time.Now()
+	//glog.Infof("REQUEST [ %s ] timeout: %v", req_debug, timeout)
+	//begin := time.Now()
 	resp, err := client.Do(req) //发送
-	cost := time.Now().Sub(begin)
-	code := -1
-	if resp != nil {
-		code = resp.StatusCode
-	}
-	glog.Infof("REQUEST [ %s ] status: %d, recv header cost: %v", req_debug, code, cost)
+	// cost := time.Now().Sub(begin)
+	// code := -1
+	// if resp != nil {
+	// 	code = resp.StatusCode
+	// }
+	// glog.Infof("REQUEST [ %s ] status: %d, recv header cost: %v", req_debug, code, cost)
 
 	return resp, err, req_debug
 }
