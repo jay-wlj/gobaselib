@@ -136,6 +136,10 @@ func (this *RedisCache) HIncrBy(key, field string, incr int64) (n int64, err err
 	n, err = this.client.HIncrBy(key, field, incr).Result()
 	return
 }
+func (this *RedisCache) HDel(key string, fields... string)(n int64, err error) {
+	n, err = this.client.HDel(key, fields...).Result()
+	return
+}
 
 func (this *RedisCache) SAdd(key string, members ...interface{}) (n int64, err error) {
 	n, err = this.client.SAdd(key, members...).Result()

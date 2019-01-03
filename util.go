@@ -23,6 +23,12 @@ func StringToInt64(str string) (value int64, err error) {
 	return
 }
 
+func StringToFloat64(str string)(value float64, err error) {
+	value, err = strconv.ParseFloat(str, 64)
+	return
+}
+
+
 func IntToString(value int) (strvalue string) {
 	strvalue = strconv.Itoa(value)
 	return
@@ -34,7 +40,7 @@ func Int64ToString(value int64) (strvalue string) {
 }
 
 func Float64ToString(value float64) (strvalue string) {
-	strvalue = strconv.FormatFloat(value, 'E', -1, 64)
+	strvalue = strconv.FormatFloat(value, 'f', -1, 64)
 	return
 }
 
@@ -173,20 +179,34 @@ func UniqueInt64Slice(slc []int64) []int64 {
 }
 
 // struct2map
-func StructToMap(v interface{})map[string]interface{} {
-	t := reflect.TypeOf(v)
-	vf := reflect.ValueOf(v)
-	m := make(map[string]interface{})
-	if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
-		str, err := json.Marshal(v)
-		if err == nil {
-			json.Unmarshal(str, &m)
-		}
-	} else {		
-		for i:=0; i<t.NumField(); i++ {
-			m[strings.ToLower(t.Field(i).Name)] = vf.Field(i).Interface()
-		}
+func StructToMap(v interface{})(m map[string]interface{}) {
+	// t := reflect.TypeOf(v)
+	// vf := reflect.ValueOf(v)
+
+	m = make(map[string]interface{})
+	bt, err := json.Marshal(v)
+	if err != nil {
+		return
 	}
 
-	return m
+	json.Unmarshal(bt, &m)
+	// return 
+	// m := make(map[string]interface{})
+	// if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
+	// 	str, err := json.Marshal(v)
+	// 	if err == nil {
+	// 		json.Unmarshal(str, &m)
+	// 	}
+	// } else {		
+	// 	for i:=0; i<t.NumField(); i++ {
+	// 		//m[strings.ToLower(t.Field(i).Name)] = vf.Field(i).Interface()
+	// 		key := t.Field(i).Tag.Get(tag)
+	// 		keys := strings.Split(key, ",")
+	// 		if len(keys) > 0 && keys[0] != "-" {
+	// 			m[keys[0]] = vf.Field(i).Interface()
+	// 		}
+	// 	}
+	// }
+
+	return 
 }

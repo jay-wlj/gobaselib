@@ -28,9 +28,9 @@ func ParseArgs(uri string) (args map[string]string) {
 }
 
 func YfHttpPost(uri string, body []byte, headers map[string]string, timeout time.Duration, app_key string) *base.OkJson {
-	// if _, ok := headers["Content-Type"]; !ok {
-	// 	headers["Content-Type"] = "application/json"	// 默认为json类型
-	// }
+	if _, ok := headers["Content-Type"]; !ok {
+		headers["Content-Type"] = "application/json"	// 默认为json类型
+	}
 	signature, SignStr := "", ""
 	if app_key != "" {
 		args := ParseArgs(uri)

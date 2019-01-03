@@ -19,11 +19,14 @@ func TokenCheck(account_server, token string, timeout time.Duration) (user_id, u
 	headers["X-YF-Token"] = token
 
 	res := base.HttpGetJson(uri, headers, timeout)
-	glog.Infof("request [%s] status: %d", res.ReqDebug, res.StatusCode)
+	//glog.Infof("request [%s] status: %d", res.ReqDebug, res.StatusCode)
 
 	if res.StatusCode != 200 {
-		glog.Errorf("request [%s] failed! err: %v", res.ReqDebug, res.Error)
-		err = fmt.Errorf("ERR_SERVER_ERROR")
+		glog.Debugf("request [%s] failed! err: %v", res.ReqDebug, res.Error)
+		err = res.Error
+		if res.Error == nil {
+			err = fmt.Errorf("ERR_SERVER_ERROR")
+		}
 		return
 	}
 

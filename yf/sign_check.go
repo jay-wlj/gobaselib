@@ -81,13 +81,12 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 func Sign_Check(c *gin.Context) {
 	uri := base.GetUri(c)
 
-	body := []byte("")
-	if c.Request.Method == "POST" || c.Request.Method == "PUT" {
-		body, _ = ioutil.ReadAll(c.Request.Body)
-		c.Set("viewbody", body)
-	}
-
 	if SignConfig.CheckSign && !SignConfig.IgnoreSignList[uri] {
+		body := []byte("")
+		if c.Request.Method == "POST" || c.Request.Method == "PUT" {
+			body, _ = ioutil.ReadAll(c.Request.Body)
+			c.Set("viewbody", body)
+		}
 		ApiSignCheck(c, body)
 	}
 

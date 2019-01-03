@@ -15,19 +15,19 @@ type Nsq struct {
 }
 
 func NewNsq(mqurls []string)(r *Nsq) {
-	mps := map[string]*nsq.Producer{}
+	mps := make(map[string]*nsq.Producer)
 	for _, v := range mqurls{
 		mps[v] = initProducer(v)
 	}
 	r = &Nsq{mps}
-	glog.Error("mqurls:", r.mps)
+	glog.Error("mqurls:", r.mps, " mqurls:", mqurls)
 	return 
 }
 
 
 
 // 发布消息
-func (m *Nsq)PublishMsg(v NsqMsg) error {
+func (m *Nsq)PublishMsg(v NsqMsg) error {	
 	content, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -54,7 +54,7 @@ func (m *Nsq)asyncPublishMsg(topic string, body []byte)(err error) {
 		} 
 		return 
 	}
-	glog.Errorf("all nsqd publih fail! topic:", topic, " body:",string(body))
+	glog.Error("all nsqd publih fail! topic:", topic, " body:",string(body))
 
 	return
 }
@@ -66,7 +66,7 @@ func initProducer(str string)(producer *nsq.Producer) {
 	glog.Info("address: ", str)
 	producer, err = nsq.NewProducer(str, nsq.NewConfig())
 	if err != nil {
-		glog.Error(err)
+		glog.Error("initProducer fail! err=", err)
 		panic(err)
 	}
 	return
