@@ -283,3 +283,7 @@ func (this *RedisCache) LPush(key string, values ...interface{}) *redis.IntCmd {
 func (this *RedisCache) LRange(key string, start, stop int64) ([]string, error) {
 	return this.client.LRange(key, start, stop).Result()
 }
+
+func (this *RedisCache) LTrim(key string, start, end int64) *redis.StatusCmd {
+	return this.client.LTrim(key, start, end)
+}
