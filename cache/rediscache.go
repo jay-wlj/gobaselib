@@ -275,3 +275,11 @@ func MakeHCacheQuery(fptr interface{}) {
 func (this *RedisCache) CacheStats() *redis.PoolStats {
 	return this.client.PoolStats()
 }
+
+func (this *RedisCache) LPush(key string, values ...interface{}) *redis.IntCmd {
+    return this.client.LPush(key, values...)
+}
+
+func (this *RedisCache) LRange(key string, start, stop int64) ([]string, error) {
+	return this.client.LRange(key, start, stop).Result()
+}
