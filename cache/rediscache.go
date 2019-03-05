@@ -6,8 +6,9 @@ import (
 	"reflect"
 	"strings"
 	"time"
+
 	"github.com/jie123108/glog"
-	"gopkg.in/redis.v5"
+	redis "gopkg.in/redis.v5"
 )
 
 var (
@@ -54,13 +55,12 @@ func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 	return
 }
 
-
-func (this *RedisCache) Subscribe(channel ...string)(pub *redis.PubSub, err error) {
-	pub, err = this.client.Subscribe(channel...)		
+func (this *RedisCache) Subscribe(channel ...string) (pub *redis.PubSub, err error) {
+	pub, err = this.client.Subscribe(channel...)
 	return
 }
 
-func (this *RedisCache) Publish(channel, message string)(int64, error) {
+func (this *RedisCache) Publish(channel, message string) (int64, error) {
 	return this.client.Publish(channel, message).Result()
 }
 
@@ -115,7 +115,7 @@ func (this *RedisCache) HGetF64(key, field string) (val float64, err error) {
 	return
 }
 
-func (this *RedisCache)HGetAll(key string)(val map[string]string, err error) {
+func (this *RedisCache) HGetAll(key string) (val map[string]string, err error) {
 	val, err = this.client.HGetAll(key).Result()
 	return
 }
@@ -136,7 +136,7 @@ func (this *RedisCache) HIncrBy(key, field string, incr int64) (n int64, err err
 	n, err = this.client.HIncrBy(key, field, incr).Result()
 	return
 }
-func (this *RedisCache) HDel(key string, fields... string)(n int64, err error) {
+func (this *RedisCache) HDel(key string, fields ...string) (n int64, err error) {
 	n, err = this.client.HDel(key, fields...).Result()
 	return
 }
@@ -219,8 +219,6 @@ func MakeCacheQuery(fptr interface{}) {
 	fn.Set(v)
 }
 
-
-
 // in: this *RedisCache, hashcachekey, field string, exptime time.Duration, query_func QueryFunc, args... interface{}
 //out: val interface{}, err error, cached string
 func HCacheQuery(in []reflect.Value) []reflect.Value {
@@ -277,7 +275,7 @@ func (this *RedisCache) CacheStats() *redis.PoolStats {
 }
 
 func (this *RedisCache) LPush(key string, values ...interface{}) *redis.IntCmd {
-    return this.client.LPush(key, values...)
+	return this.client.LPush(key, values...)
 }
 
 func (this *RedisCache) LRange(key string, start, stop int64) ([]string, error) {
@@ -286,4 +284,12 @@ func (this *RedisCache) LRange(key string, start, stop int64) ([]string, error) 
 
 func (this *RedisCache) LTrim(key string, start, end int64) *redis.StatusCmd {
 	return this.client.LTrim(key, start, end)
+}
+
+func (this *RedisCache) SetNx(key string, value interface{}, exptime time.Duration) (bool, error) {
+	return this.client.SetNX(key, value, exptime).Result()
+}
+
+func (this *RedisCache) HSetNx(key, field string, value interface{}) (bool, error) {
+	return this.client.HSetNX(key, field, value).Result()
 }

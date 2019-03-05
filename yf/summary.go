@@ -29,6 +29,12 @@ func Md5hex(data []byte) string {
 	bs := h.Sum(nil)
 	return fmt.Sprintf("%x", bs)
 }
+func Md5Hex(data []byte) string {
+	h := md5.New()
+	h.Write(data)
+	bs := h.Sum(nil)
+	return fmt.Sprintf("%X", bs)
+}
 
 func Md5Reader(reader io.Reader) (string, int64, error) {
 	h := md5.New()

@@ -217,6 +217,7 @@ func Http_req(method, uri string, body []byte, args map[string]string, headers m
 
 	//glog.Infof("REQUEST [ %s ] timeout: %v", req_debug, timeout)
 	//begin := time.Now()
+	client.Timeout = timeout    // add by wlj
 	resp, err := client.Do(req) //发送
 	// cost := time.Now().Sub(begin)
 	// code := -1

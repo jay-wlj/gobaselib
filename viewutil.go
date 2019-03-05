@@ -10,8 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
-	
-	"github.com/json-iterator/go"
+
+	jsoniter "github.com/json-iterator/go"
 	//"unsafe"
 )
 
@@ -25,13 +25,17 @@ func GetUri(c *gin.Context) string {
 	return uri
 }
 
-func CheckQueryStringField(c *gin.Context, key string) (value string, err error) {
-	strvalue := c.Query(key)
-	return strvalue, nil
+func CheckStringToInt64(strvalue string) (value int64, err error) {
+	if 0 == len(strvalue) {
+		value = 0
+		err = fmt.Errorf("ERR_ARGS_MISSING")
+		return
+	}
+	value, err = strconv.ParseInt(strvalue, 10, 64)
+	return
 }
 
-func CheckQueryIntField(c *gin.Context, key string) (value int, err error) {
-	strvalue := c.Query(key)
+func CheckStringToInt(strvalue string) (value int, err error) {
 	if 0 == len(strvalue) {
 		value = 0
 		err = fmt.Errorf("ERR_ARGS_MISSING")
@@ -39,6 +43,25 @@ func CheckQueryIntField(c *gin.Context, key string) (value int, err error) {
 	}
 	value, err = strconv.Atoi(strvalue)
 	return
+}
+
+func CheckStringToFloat64(strvalue string) (value float64, err error) {
+	if 0 == len(strvalue) {
+		err = fmt.Errorf("ERR_ARGS_MISSING")
+		return
+	}
+	value, err = strconv.ParseFloat(strvalue, 64)
+	return
+}
+
+func CheckQueryStringField(c *gin.Context, key string) (value string, err error) {
+	strvalue := c.Query(key)
+	return strvalue, nil
+}
+
+func CheckQueryIntField(c *gin.Context, key string) (value int, err error) {
+	strvalue := c.Query(key)
+	return CheckStringToInt(strvalue)
 }
 
 func CheckQueryIntDefaultField(c *gin.Context, key string, def int) (value int, err error) {
@@ -54,13 +77,7 @@ func CheckQueryIntDefaultField(c *gin.Context, key string, def int) (value int, 
 
 func CheckQueryInt64Field(c *gin.Context, key string) (value int64, err error) {
 	strvalue := c.Query(key)
-	if 0 == len(strvalue) {
-		value = 0
-		err = fmt.Errorf("ERR_ARGS_MISSING")
-		return
-	}
-	value, err = strconv.ParseInt(strvalue, 10, 64)
-	return
+	return CheckStringToInt64(strvalue)
 }
 
 func CheckQueryInt64DefaultField(c *gin.Context, key string, def int64) (value int64, err error) {
@@ -102,7 +119,7 @@ func GetPostJsonData(c *gin.Context) ([]byte, error) {
 	if !exists {
 		raw_body := c.Request.Body
 		buf, err = ioutil.ReadAll(raw_body)
-		c.Set("viewbody", buf)		// 注 需要保存body
+		c.Set("viewbody", buf) // 注 需要保存body
 		//glog.Info("GetPostJsonData buf:", string(buf))
 	} else {
 		buf = body.([]byte)
