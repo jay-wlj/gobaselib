@@ -6,7 +6,15 @@ import (
 )
 
 func SelectStructView(s interface{}, name string) map[string]interface{} {
+	if s == nil {
+		return map[string]interface{}{}
+	}
 	rt, rv := reflect.TypeOf(s), reflect.ValueOf(s)
+	// 传进来的是结构体指针 则指向结构体
+	if rv.Kind() == reflect.Ptr && rv.Elem().Kind() == reflect.Struct {
+		rt = rt.Elem()
+		rv = rv.Elem()
+	}
 	out := make(map[string]interface{}, rt.NumField())
 
 	// 拆解name 以"not "开头为排除拥有此标识的字段,否则只获取此标识的字段
