@@ -3,9 +3,10 @@ package gobaselib
 import (
 	// "fmt"
 	"encoding/json"
-	"github.com/jie123108/glog"
 	"gobaselib/cache"
 	"time"
+
+	"github.com/jie123108/glog"
 )
 
 type RedisHttpClient struct {

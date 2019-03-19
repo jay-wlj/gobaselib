@@ -1,14 +1,17 @@
 package gobaselib
 
 import (
+	"encoding/json"
+	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 	"unsafe"
-	"math"
-	"fmt"
-	"encoding/json"
 )
+
+type Maps map[string]interface{}
 
 const FLOAT_MIN = 0.0000001
 const FLOAT_MIN_PRECISION = 8
@@ -23,11 +26,10 @@ func StringToInt64(str string) (value int64, err error) {
 	return
 }
 
-func StringToFloat64(str string)(value float64, err error) {
+func StringToFloat64(str string) (value float64, err error) {
 	value, err = strconv.ParseFloat(str, 64)
 	return
 }
-
 
 func IntToString(value int) (strvalue string) {
 	strvalue = strconv.Itoa(value)
@@ -67,7 +69,6 @@ func IntSliceToString(values []int, splite string) (strvalue string) {
 	}
 	return
 }
-
 
 func StringSliceToString(values []string, splite string) (strvalue string) {
 	bfirst := true
@@ -134,9 +135,9 @@ func Version4ToInt(version string) int {
 	arr := strings.Split(version, ".")
 	fix_data := 1
 	ver := 0
-	for i:=len(arr)-1; i>=0; i-- {
+	for i := len(arr) - 1; i >= 0; i-- {
 		d, _ := StringToInt(arr[i])
-		ver = ver + d * fix_data
+		ver = ver + d*fix_data
 		fix_data *= 10000
 	}
 	return ver
@@ -150,7 +151,7 @@ func Round2(f float64, n int) float64 {
 }
 
 // 判断分页是否末尾了
-func IsListEnded(page, page_size, count, total int)(ended bool) {
+func IsListEnded(page, page_size, count, total int) (ended bool) {
 	ended = true
 	if page_size == count {
 		if page*page_size < total {
@@ -161,25 +162,25 @@ func IsListEnded(page, page_size, count, total int)(ended bool) {
 }
 
 func IsEqual(f1, f2 float64) bool {
-    return math.Abs(f1-f2) < FLOAT_MIN
+	return math.Abs(f1-f2) < FLOAT_MIN
 }
 
 // 通过map主键唯一的特性过滤重复元素
 func UniqueInt64Slice(slc []int64) []int64 {
-    result := []int64{}
-    tempMap := map[int64]bool{}  // 存放不重复主键
-    for _, e := range slc{
-        l := len(tempMap)
-        tempMap[e] = true
-        if len(tempMap) != l{  // 加入map后，map长度变化，则元素不重复
-            result = append(result, e)
-        }
-    }
-    return result
+	result := []int64{}
+	tempMap := map[int64]bool{} // 存放不重复主键
+	for _, e := range slc {
+		l := len(tempMap)
+		tempMap[e] = true
+		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
+			result = append(result, e)
+		}
+	}
+	return result
 }
 
 // struct2map
-func StructToMap(v interface{})(m map[string]interface{}) {
+func StructToMap(v interface{}) (m map[string]interface{}) {
 	// t := reflect.TypeOf(v)
 	// vf := reflect.ValueOf(v)
 
@@ -190,14 +191,14 @@ func StructToMap(v interface{})(m map[string]interface{}) {
 	}
 
 	json.Unmarshal(bt, &m)
-	// return 
+	// return
 	// m := make(map[string]interface{})
 	// if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
 	// 	str, err := json.Marshal(v)
 	// 	if err == nil {
 	// 		json.Unmarshal(str, &m)
 	// 	}
-	// } else {		
+	// } else {
 	// 	for i:=0; i<t.NumField(); i++ {
 	// 		//m[strings.ToLower(t.Field(i).Name)] = vf.Field(i).Interface()
 	// 		key := t.Field(i).Tag.Get(tag)
@@ -208,5 +209,20 @@ func StructToMap(v interface{})(m map[string]interface{}) {
 	// 	}
 	// }
 
-	return 
+	return
+}
+
+func GetCurDay() string {
+	return time.Now().Format("2006-01-02")
+}
+
+// 手机号脱敏处理
+func SensitiveTel(tel string) string {
+	num := len(tel)
+	if num >= 11 {
+		tel = tel[:3] + "****" + tel[7:]
+	} else if num > 5 {
+		tel = tel[:2] + "***" + tel[5:]
+	}
+	return tel
 }

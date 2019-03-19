@@ -20,17 +20,18 @@ func init() {
 }
 
 type RedisConfig struct {
-	CacheName string
-	Addr      string // host:port
-	Password  string
-	DBIndex   int
-	Timeout   time.Duration
+	CacheName  string
+	Addr       string // host:port
+	Password   string
+	DBIndex    int           `yaml:"dbindex"`
+	Timeout    time.Duration `yaml:"-"`
+	TimeoutStr string        `yaml:"timeout"`
 }
 
 type RedisCache struct {
 	cacheName string
 	Cfg       *RedisConfig
-	client    *redis.Client
+	*redis.Client
 }
 
 func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
@@ -44,24 +45,33 @@ func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 	}
 	cache.Cfg = cfg
 
-	cache.client = redis.NewClient(&redis.Options{Addr: cfg.Addr, Password: cfg.Password, DB: cfg.DBIndex})
-	pong, err := cache.client.Ping().Result()
+	if cfg.Timeout == 0 && cfg.TimeoutStr != "" {
+		if cfg.Timeout, err = time.ParseDuration(cfg.TimeoutStr); err != nil {
+			glog.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! timeout:", cfg.Timeout, " err:", err)
+			cache = nil
+			return
+		}
+	}
+
+	cache.Client = redis.NewClient(&redis.Options{Addr: cfg.Addr, Password: cfg.Password, DB: cfg.DBIndex, DialTimeout: cfg.Timeout})
+	var pong string
+	pong, err = cache.Client.Ping().Result()
 	if err != nil {
 		glog.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! pong:", pong, " err:", err)
 		cache = nil
 		return
 	}
-
 	return
 }
 
 func (this *RedisCache) Subscribe(channel ...string) (pub *redis.PubSub, err error) {
-	pub, err = this.client.Subscribe(channel...)
+
+	pub, err = this.Client.Subscribe(channel...)
 	return
 }
 
 func (this *RedisCache) Publish(channel, message string) (int64, error) {
-	return this.client.Publish(channel, message).Result()
+	return this.Client.Publish(channel, message).Result()
 }
 
 // 如果key为 xxx->field, 将从hash中获取数据.
@@ -70,7 +80,7 @@ func (this *RedisCache) GetB(key string) (val []byte, err error) {
 	if len(keys) == 2 {
 		val, err = this.HGetB(keys[0], keys[1])
 	} else {
-		val, err = this.client.Get(key).Bytes()
+		val, err = this.Client.Get(key).Bytes()
 	}
 	return
 }
@@ -90,40 +100,41 @@ func (this *RedisCache) Set(key string, value interface{}, exptime time.Duration
 	if len(keys) == 2 {
 		err = this.HSet(keys[0], keys[1], value, exptime)
 	} else {
-		err = this.client.Set(key, value, exptime).Err()
+		err = this.Client.Set(key, value, exptime).Err()
 	}
+
 	return
 }
 
 func (this *RedisCache) HGet(key, field string) (val string, err error) {
-	val, err = this.client.HGet(key, field).Result()
+	val, err = this.Client.HGet(key, field).Result()
 	return
 }
 
 func (this *RedisCache) HGetI(key, field string) (val int64, err error) {
-	val, err = this.client.HGet(key, field).Int64()
+	val, err = this.Client.HGet(key, field).Int64()
 	return
 }
 
 func (this *RedisCache) HGetB(key, field string) (val []byte, err error) {
-	val, err = this.client.HGet(key, field).Bytes()
+	val, err = this.Client.HGet(key, field).Bytes()
 	return
 }
 
 func (this *RedisCache) HGetF64(key, field string) (val float64, err error) {
-	val, err = this.client.HGet(key, field).Float64()
+	val, err = this.Client.HGet(key, field).Float64()
 	return
 }
 
 func (this *RedisCache) HGetAll(key string) (val map[string]string, err error) {
-	val, err = this.client.HGetAll(key).Result()
+	val, err = this.Client.HGetAll(key).Result()
 	return
 }
 
 func (this *RedisCache) HSet(key, field string, value interface{}, exptime time.Duration) (err error) {
-	err = this.client.HSet(key, field, value).Err()
+	err = this.Client.HSet(key, field, value).Err()
 	if err == nil && exptime > 0 {
-		err = this.client.Expire(key, exptime).Err()
+		err = this.Client.Expire(key, exptime).Err()
 		if err != nil {
 			glog.Error("redis.Expire(", key, ", ", exptime, ") failed! err:", err)
 			err = nil
@@ -133,25 +144,26 @@ func (this *RedisCache) HSet(key, field string, value interface{}, exptime time.
 }
 
 func (this *RedisCache) HIncrBy(key, field string, incr int64) (n int64, err error) {
-	n, err = this.client.HIncrBy(key, field, incr).Result()
+	n, err = this.Client.HIncrBy(key, field, incr).Result()
 	return
 }
 func (this *RedisCache) HDel(key string, fields ...string) (n int64, err error) {
-	n, err = this.client.HDel(key, fields...).Result()
+	n, err = this.Client.HDel(key, fields...).Result()
 	return
 }
 
 func (this *RedisCache) SAdd(key string, members ...interface{}) (n int64, err error) {
-	n, err = this.client.SAdd(key, members...).Result()
+	n, err = this.Client.SAdd(key, members...).Result()
 	return
 }
+
 func (this *RedisCache) Del(keys ...string) (n int64, err error) {
-	n, err = this.client.Del(keys...).Result()
+	n, err = this.Client.Del(keys...).Result()
 	return
 }
 
 func (this *RedisCache) Eval(script string, keys []string, args ...interface{}) (n int64, err error) {
-	t, err := this.client.Eval(script, keys, args...).Result()
+	t, err := this.Client.Eval(script, keys, args...).Result()
 	switch t := t.(type) {
 	case int64:
 		n = t
@@ -271,25 +283,28 @@ func MakeHCacheQuery(fptr interface{}) {
 }
 
 func (this *RedisCache) CacheStats() *redis.PoolStats {
-	return this.client.PoolStats()
+	return this.Client.PoolStats()
 }
 
 func (this *RedisCache) LPush(key string, values ...interface{}) *redis.IntCmd {
-	return this.client.LPush(key, values...)
+	return this.Client.LPush(key, values...)
 }
 
 func (this *RedisCache) LRange(key string, start, stop int64) ([]string, error) {
-	return this.client.LRange(key, start, stop).Result()
+	return this.Client.LRange(key, start, stop).Result()
 }
 
 func (this *RedisCache) LTrim(key string, start, end int64) *redis.StatusCmd {
-	return this.client.LTrim(key, start, end)
+	return this.Client.LTrim(key, start, end)
+}
+func (this *RedisCache) LLen(key string) (int64, error) {
+	return this.Client.LLen(key).Result()
 }
 
 func (this *RedisCache) SetNx(key string, value interface{}, exptime time.Duration) (bool, error) {
-	return this.client.SetNX(key, value, exptime).Result()
+	return this.Client.SetNX(key, value, exptime).Result()
 }
 
 func (this *RedisCache) HSetNx(key, field string, value interface{}) (bool, error) {
-	return this.client.HSetNX(key, field, value).Result()
+	return this.Client.HSetNX(key, field, value).Result()
 }
