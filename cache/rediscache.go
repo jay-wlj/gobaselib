@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -290,8 +291,14 @@ func (this *RedisCache) LPush(key string, values ...interface{}) *redis.IntCmd {
 	return this.Client.LPush(key, values...)
 }
 
-func (this *RedisCache) LRange(key string, start, stop int64) ([]string, error) {
-	return this.Client.LRange(key, start, stop).Result()
+func (this *RedisCache) LRangeI64(key string, start, stop int64) (vs []int64, err error) {
+	vs = []int64{}
+	var rs []string
+	rs, err = this.Client.LRange(key, start, stop).Result()
+	if err == nil && rs != nil {
+		return StringSliceToInt64Slice(rs)
+	}
+	return
 }
 
 func (this *RedisCache) LTrim(key string, start, end int64) *redis.StatusCmd {
@@ -307,4 +314,51 @@ func (this *RedisCache) SetNx(key string, value interface{}, exptime time.Durati
 
 func (this *RedisCache) HSetNx(key, field string, value interface{}) (bool, error) {
 	return this.Client.HSetNX(key, field, value).Result()
+}
+
+func (this *RedisCache) ZAddI64(key string, values []int64) (int64, error) {
+	members := []redis.Z{}
+	for i, v := range values {
+		members = append(members, redis.Z{float64(i), v})
+	}
+	return this.Client.ZAdd(key, members...).Result()
+}
+
+func (this *RedisCache) ZRangeI64(key string, start, stop int64) (vs []int64, err error) {
+	vs = []int64{}
+	var rs []string
+	rs, err = this.Client.ZRange(key, start, stop).Result()
+	if err == nil && rs != nil {
+		return StringSliceToInt64Slice(rs)
+	}
+	return
+}
+
+func (this *RedisCache) ZIsMember(key string, member string) (ok bool, err error) {
+	ok = false
+	_, err = this.Client.ZRank(key, member).Result()
+	if err == nil {
+		ok = true
+	}
+	if err == redis.Nil {
+		err = nil
+	}
+	return
+
+}
+
+func StringSliceToInt64Slice(vals []string) (vs []int64, err error) {
+	vs = []int64{}
+	if vals == nil {
+		return
+	}
+
+	var n int64
+	for _, v := range vals {
+		if n, err = strconv.ParseInt(v, 10, 64); err != nil {
+			return
+		}
+		vs = append(vs, n)
+	}
+	return
 }

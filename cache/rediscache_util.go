@@ -67,7 +67,11 @@ func GetReader(key string) (*RedisCache, error) {
 	if v, ok := m_slaveRedis[key]; ok {
 		return v, nil
 	}
-	return nil, fmt.Errorf("GetReader(): redis writer is unvaild! key=", key)
+
+	// 没有在只读的redis 则读取master的redis
+	return GetWriter(key)
+
+	return nil, fmt.Errorf("GetReader(): redis reader is unvaild! key=", key)
 }
 
 func NewRedisCacheFromCfg(rediserver, password, strTimeout string, dbindex int) (redis *RedisCache, err error) {
