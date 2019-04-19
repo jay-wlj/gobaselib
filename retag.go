@@ -60,8 +60,15 @@ func SelectStructView(s interface{}, name string) interface{} {
 				v := rv.Field(i)
 				// 判断字段是否为空 忽略
 				if omitempty {
-					if !v.IsValid() || v.Interface() == reflect.Zero(v.Type()).Interface() {
+
+					if !v.IsValid() {
 						continue
+					}
+					// map,slice,function不能进行比较
+					if v.Kind() != reflect.Map && v.Kind() != reflect.Slice && v.Kind() != reflect.Func {
+						if v.Interface() == reflect.Zero(v.Type()).Interface() {
+							continue
+						}
 					}
 				}
 

@@ -316,6 +316,38 @@ func (this *RedisCache) HSetNx(key, field string, value interface{}) (bool, erro
 	return this.Client.HSetNX(key, field, value).Result()
 }
 
+// 尝试获取锁
+func (this *RedisCache) TryLock(key string, exptime time.Duration) (ok bool, err error) {
+	now := time.Now().UnixNano() // 当前时间ns
+	acquire_time := now + int64(exptime)
+	ok, err = this.Client.SetNX(key, acquire_time, 0).Result()
+
+	// 获取到锁或发生错误 直接返回
+	if err != nil || ok {
+		return
+	}
+	// 获取锁值是否过期
+	var old int64
+	if old, err = this.Client.Get(key).Int64(); err != nil {
+		return
+	}
+	if old < now {
+		// 锁已过期 尝试获取锁 设置过期时间
+		var new int64
+		if new, err = this.Client.GetSet(key, acquire_time).Int64(); err != nil {
+			return
+		}
+		if old == new {
+			// 成功获取到锁
+			ok = true
+			return
+		} else {
+			// 锁已被其它线程获取
+		}
+	}
+	return
+}
+
 func (this *RedisCache) ZAddI64(key string, values []int64) (int64, error) {
 	members := []redis.Z{}
 	for i, v := range values {
