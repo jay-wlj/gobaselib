@@ -4,6 +4,7 @@ import (
 	// "fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
+
 	//"strings"
 	base "gobaselib"
 	"time"
@@ -39,7 +40,7 @@ func token_check(c *gin.Context) bool {
 	token := req_tokens[0]
 	glog.Infof("req_token: %s", token)
 	// Check Token from account
-	user_id, user_type, _, err := TokenCheck(TokenConfig.AccountServer, token, TokenConfig.AccountTimeout)
+	user_id, user_type, _, err := token_check_server(TokenConfig.AccountServer, token, TokenConfig.AccountTimeout)
 	if err != nil {
 		glog.Debugf("CheckToken(%s) failed! timeout:%v err: %v", token, TokenConfig.AccountTimeout, err)
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_TOKEN_INVALID})

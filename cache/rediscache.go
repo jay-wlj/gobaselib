@@ -153,8 +153,20 @@ func (this *RedisCache) HDel(key string, fields ...string) (n int64, err error) 
 	return
 }
 
-func (this *RedisCache) SAdd(key string, members ...interface{}) (n int64, err error) {
+func (this *RedisCache) SAddInt64(key string, ids []int64) (n int64, err error) {
+	members := []interface{}{}
+	for _, v := range ids {
+		members = append(members, v)
+	}
 	n, err = this.Client.SAdd(key, members...).Result()
+	return
+}
+
+func (this *RedisCache) SMembersInt64(key string) (vs []int64, err error) {
+	var vals []string
+	if vals, err = this.Client.SMembers(key).Result(); err == nil {
+		vs, err = StringSliceToInt64Slice(vals)
+	}
 	return
 }
 

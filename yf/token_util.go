@@ -10,8 +10,12 @@ import (
 	"github.com/jie123108/glog"
 )
 
+func TokenCheck(token string) (user_id, user_type, expire_time int64, err error) {
+	return token_check_server(TokenConfig.AccountServer, token, TokenConfig.AccountTimeout)
+}
+
 // TODO: 检查Token过期时间。
-func TokenCheck(account_server, token string, timeout time.Duration) (user_id, user_type, expire_time int64, err error) {
+func token_check_server(account_server, token string, timeout time.Duration) (user_id, user_type, expire_time int64, err error) {
 	uri := account_server + "/man/account/token/check"
 	headers := make(map[string]string)
 	headers["Host"] = "account.yunbay.com"
