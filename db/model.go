@@ -9,6 +9,7 @@ import (
 
 // 公共model更新时间及创建时间
 type Model struct {
+	Id         int64 `json:"id" gorm:"primary_key:id"`
 	CreateTime int64 `json:"create_time"`
 	UpdateTime int64 `json:"update_time"`
 }
