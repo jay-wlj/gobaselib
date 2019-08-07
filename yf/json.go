@@ -28,6 +28,12 @@ func JSON_Fail(c *gin.Context, reason string) gin.H {
 	return response
 }
 
+func JSON_FailCode(c *gin.Context, reason string, code int32) gin.H {
+	response := gin.H{"ok": false, "reason": reason, "code": code}
+	JSON(c, 200, false, response)
+	return response
+}
+
 func JSON_FailEx(c *gin.Context, reason string, data interface{}) gin.H {
 	response := gin.H{"ok": false, "reason": reason, "data": data}
 	if reason == ERR_SERVER_ERROR {

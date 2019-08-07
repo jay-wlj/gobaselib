@@ -41,6 +41,11 @@ func Int64ToString(value int64) (strvalue string) {
 	return
 }
 
+func Uint64ToString(value uint64) (strvalue string) {
+	strvalue = strconv.FormatUint(value, 10)
+	return
+}
+
 func Float64ToString(value float64) (strvalue string) {
 	strvalue = strconv.FormatFloat(value, 'f', -1, 64)
 	return
@@ -96,6 +101,18 @@ func Int64SliceToString(values []int64, splite string) (strvalue string) {
 	return
 }
 
+func Uint64SliceToString(values []uint64, splite string) (strvalue string) {
+	bfirst := true
+	for _, value := range values {
+		if !bfirst {
+			strvalue += splite
+		} else {
+			bfirst = false
+		}
+		strvalue += Uint64ToString(value)
+	}
+	return
+}
 func StringToIntSlice(str string, splite string) (ivalues []int) {
 	strarr := strings.Split(str, splite)
 	for _, strvalue := range strarr {
@@ -162,7 +179,7 @@ func IsListEnded(page, page_size, count, total int) (ended bool) {
 }
 
 func IsEqual(f1, f2 float64) bool {
-	return math.Abs(f1-f2) < FLOAT_MIN
+	return math.Abs(f1-f2) <= FLOAT_MIN
 }
 
 // 通过map主键唯一的特性过滤重复元素

@@ -16,8 +16,10 @@ const (
 	ERR_HTTP_FORBIDDEN       string = "ERR_HTTP_FORBIDDEN"       // http forbidden
 	ERR_ARGS_MISSING         string = "ERR_ARGS_MISSING"         // 参数缺失
 	ERR_NOT_FOUND            string = "ERR_NOT_FOUND"            // 没有找到
+	ERR_NOT_EXISTS           string = "ERR_NOT_EXISTS"           // 不存在的记录
 	DATA_NOT_MOTIFIED        string = "DATA_NOT_MOTIFIED"        // 数据不能修改
 	DATA_NOT_EXIST           string = "DATA_NOT_EXIST"           // 数据不存在
+	DATA_NOT_SUPPORT         string = "DATA_NOT_SUPPORT"         // 不支持
 	ERR_EMAIL_INVALID        string = "ERR_EMAIL_INVALID"        // 非法的邮箱地址
 	ERR_ACTION_UNSUPPORTED   string = "ERR_ACTION_UNSUPPORTED"
 	ERR_OBJECT_RECOMMENDED   string = "ERR_OBJECT_RECOMMENDED"

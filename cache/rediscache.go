@@ -169,6 +169,14 @@ func (this *RedisCache) SMembersInt64(key string) (vs []int64, err error) {
 	}
 	return
 }
+func (this *RedisCache) SRemInt64(key string, ids []int64) (n int64, err error) {
+	members := []interface{}{}
+	for _, v := range ids {
+		members = append(members, v)
+	}
+	n, err = this.Client.SRem(key, members...).Result()
+	return
+}
 
 func (this *RedisCache) Del(keys ...string) (n int64, err error) {
 	n, err = this.Client.Del(keys...).Result()

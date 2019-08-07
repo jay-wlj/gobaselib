@@ -2,9 +2,10 @@ package yf
 
 import (
 	"fmt"
-	"github.com/jie123108/glog"
 	"strings"
 	"testing"
+
+	"github.com/jie123108/glog"
 )
 
 func parse_headers(str_headers string) map[string][]string {
@@ -54,7 +55,7 @@ func init() {
 	// method, uri, args, headers, body_encrypt
 	app_key = "16317d117c6eceb8b1b0ebb40e506617"
 	uri = "/path/test/~-_/99@/中文.doc"
-	str_args = "dest=mongo&DEST=MongoEx&aBo=d9&aBo=Ads&name&aBo=a09&aBo=030"
+	str_args = "dest=mongo&DEST=MongoEx&aBo=d9&aBo=Ads&name&aBo=a09&aBo=030工"
 	// str_args := "dest=mongo&DEST=MongoEx&aBo=d9&aBo=Ads"
 	body := "This is the body"
 	str_headers := `Host: www.yf.com
