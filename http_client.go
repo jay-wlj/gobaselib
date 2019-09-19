@@ -331,8 +331,6 @@ func HttpPost(uri string, body []byte, headers map[string]string, timeout time.D
 	return HttpReqInternal("POST", uri, body, nil, headers, timeout)
 }
 
-
-
 func OkJsonParse(res *OkJson) *OkJson {
 	decoder := json.NewDecoder(bytes.NewBuffer(res.RawBody))
 	decoder.UseNumber()

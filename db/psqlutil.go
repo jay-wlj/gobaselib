@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"sync/atomic"
 
@@ -21,7 +22,8 @@ var m_db *gorm.DB
 
 type PsqlDB struct {
 	*gorm.DB
-	tx_flag int32
+	tx_flag         int32    // 事务标志
+	fn_after_commit []func() // 提交后执行的代码
 }
 
 // func (v *PsqlDB) GetDB() *gorm.DB {
@@ -52,6 +54,12 @@ func (v *PsqlDB) Begin() *PsqlDB {
 func (v *PsqlDB) Commit() *PsqlDB {
 	if atomic.CompareAndSwapInt32(&v.tx_flag, 1, 0) {
 		v.DB = v.DB.Commit()
+		// 执行提交的代码
+		if len(v.fn_after_commit) > 0 {
+			for _, f := range v.fn_after_commit {
+				f()
+			}
+		}
 	} else {
 		glog.Debug("PsqlDB is commited! ignore this time")
 	}
@@ -65,6 +73,16 @@ func (v *PsqlDB) Rollback() *PsqlDB {
 		glog.Debug("PsqlDB is rollbacked! ignore this time")
 	}
 	return v
+}
+
+// 提交后执行的代码
+func (v *PsqlDB) AfterCommit(f ...func()) (err error) {
+	if 1 != atomic.LoadInt32(&v.tx_flag) {
+		err = errors.New("is not tx db!")
+		return
+	}
+	v.fn_after_commit = append(v.fn_after_commit, f...)
+	return
 }
 
 func InitPsqlDb(psqlUrl string, debug bool) (*gorm.DB, error) {

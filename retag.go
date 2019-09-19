@@ -198,11 +198,13 @@ func FilterStruct(s interface{}, include bool, fields ...string) interface{} {
 				continue
 			}
 
-			if include && !mfield[jsonKey] { // 过滤掉没有在需要的字段里
-				continue
-			}
-			if !include && mfield[jsonKey] { // 排除在里面的字段里
-				continue
+			if jsonKey != "" {
+				if include && !mfield[jsonKey] { // 过滤掉没有在需要的字段里
+					continue
+				}
+				if !include && mfield[jsonKey] { // 排除在里面的字段里
+					continue
+				}
 			}
 
 			v := rv.Field(i)
@@ -221,6 +223,12 @@ func FilterStruct(s interface{}, include bool, fields ...string) interface{} {
 					if v.Interface() == reflect.Zero(v.Type()).Interface() {
 						continue
 					}
+				}
+
+				// TODO 这里获取key下面所有的结构体或数组
+				if include && (kt == reflect.Slice || kt == reflect.Struct) {
+					out[jsonKey] = v.Interface()
+					continue
 				}
 			}
 

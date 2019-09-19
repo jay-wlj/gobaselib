@@ -2,7 +2,9 @@ package yf
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/jie123108/glog"
 	nsq "github.com/nsqio/go-nsq"
@@ -41,6 +43,29 @@ func (m *Nsq) AsyncPublishMsg(v NsqMsg) error {
 		return err
 	}
 	go m.asyncPublishMsg(v.Topic(), content)
+	return err
+}
+
+// 异步发布消息
+func (m *Nsq) DeferedPublishMsg(v NsqMsg, delay time.Duration) error {
+	body, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	//不能发布空串，否则会导致error
+	if len(body) == 0 {
+		err = errors.New(fmt.Sprintf("empty body! v=%v", v))
+		return err
+	}
+	for k, val := range m.mps {
+		err = val.DeferredPublishAsync(v.Topic(), delay, body, nil)
+		if err != nil {
+			glog.Errorf("publih fail! err=%v, url:%v", err, k)
+			continue
+		}
+	}
+	//glog.Error("all nsqd publih fail! topic:", v.Topic(), " body:", string(body))
+
 	return err
 }
 
