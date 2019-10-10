@@ -142,6 +142,7 @@ func newHttpClient(transport *http.Transport) *http.Client {
 const (
 	MaxIdleConnsPerHost = 15
 	MaxIdleConns        = 500
+	DefTimeOut          = 10 * time.Second
 )
 
 func newHttpTransport() *http.Transport {
