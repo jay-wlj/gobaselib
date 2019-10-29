@@ -1,4 +1,4 @@
-module gobaselib
+module github.com/jay-wlj/gobaselib
 
 go 1.12
 
