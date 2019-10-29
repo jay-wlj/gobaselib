@@ -1,12 +1,13 @@
 package mt
 
 import (
+	"io/ioutil"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
-	"io/ioutil"
+
 	//"strings"
 	base "github.com/jay-wlj/gobaselib"
-	. "gobaselib/common"
 )
 
 type ApiSignConfig struct {
@@ -88,7 +89,7 @@ func Sign_Check(c *gin.Context) {
 	if SignConfig.CheckSign && !SignConfig.IgnoreSignList[uri] {
 		ApiSignCheck(c, body)
 	}
-	
+
 	c.Next()
 
 	//context.Clear(c.Request)

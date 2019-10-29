@@ -7,7 +7,7 @@ import (
 	//"github.com/jie123108/gocrc48"
 	//"github.com/jie123108/glog"
 	//base "github.com/jay-wlj/gobaselib"
-	"gobaselib/db"
+	"github.com/jay-wlj/gobaselib/db"
 	"gopkg.in/mgo.v2/bson"
 	//"time"
 )
