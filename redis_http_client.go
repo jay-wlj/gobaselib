@@ -3,8 +3,9 @@ package gobaselib
 import (
 	// "fmt"
 	"encoding/json"
-	"gobaselib/cache"
 	"time"
+
+	"github.com/jay-wlj/gobaselib/cache"
 
 	"github.com/jie123108/glog"
 )

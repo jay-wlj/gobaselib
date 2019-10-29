@@ -2,10 +2,11 @@ package gobaselib
 
 import (
 	"encoding/json"
-	"github.com/jie123108/glog"
-	"gobaselib/cache"
 	"sync"
 	"time"
+
+	"github.com/jay-wlj/gobaselib/cache"
+	"github.com/jie123108/glog"
 )
 
 type QueryFunc func(value interface{}, args ...interface{}) error
