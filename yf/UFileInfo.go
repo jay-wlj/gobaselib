@@ -3,12 +3,14 @@ package yf
 import (
 	"fmt"
 	"io/ioutil"
+
 	// "net/http"
 	"encoding/json"
-	base "gobaselib"
 	"os"
 	"sort"
 	"strings"
+
+	base "github.com/jay-wlj/gobaselib"
 )
 
 type FileInfo struct {

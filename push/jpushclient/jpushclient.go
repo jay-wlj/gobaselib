@@ -3,7 +3,7 @@ package jpushclient
 import (
 	"encoding/json"
 	"fmt"
-	base "gobaselib"
+	base "github.com/jay-wlj/gobaselib"
 
 	"github.com/jie123108/glog"
 )

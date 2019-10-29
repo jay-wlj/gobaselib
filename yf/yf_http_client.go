@@ -2,9 +2,10 @@ package yf
 
 import (
 	"fmt"
-	base "gobaselib"
 	"net/url"
 	"time"
+
+	base "github.com/jay-wlj/gobaselib"
 )
 
 func GetContentType(filename string) string {
@@ -29,7 +30,7 @@ func ParseArgs(uri string) (args map[string]string) {
 
 func YfHttpPost(uri string, body []byte, headers map[string]string, timeout time.Duration, app_key string) *base.OkJson {
 	if _, ok := headers["Content-Type"]; !ok {
-		headers["Content-Type"] = "application/json"	// 默认为json类型
+		headers["Content-Type"] = "application/json" // 默认为json类型
 	}
 	signature, SignStr := "", ""
 	if app_key != "" {

@@ -5,7 +5,7 @@ import (
 	"github.com/jie123108/glog"
 	"io/ioutil"
 	//"strings"
-	base "gobaselib"
+	base "github.com/jay-wlj/gobaselib"
 	. "gobaselib/common"
 )
 

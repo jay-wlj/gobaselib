@@ -6,7 +6,7 @@ import (
 	//"github.com/fatih/structs"
 	//"github.com/jie123108/gocrc48"
 	//"github.com/jie123108/glog"
-	//base "gobaselib"
+	//base "github.com/jay-wlj/gobaselib"
 	"gobaselib/db"
 	"gopkg.in/mgo.v2/bson"
 	//"time"
