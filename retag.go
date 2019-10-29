@@ -4,7 +4,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/lib/pq"
+	//"github.com/jay-wlj/pq"
+	"gobaselib/db"
 
 	"github.com/shopspring/decimal"
 )
@@ -179,7 +180,7 @@ func FilterStruct(s interface{}, include bool, fields ...string) interface{} {
 		switch s.(type) {
 		case decimal.Decimal, *decimal.Decimal: // 将不需要展开的结构体列出
 			return s
-		case pq.Jsonb:
+		case db.Jsonb:
 			return s
 		}
 		out := make(map[string]interface{}, rt.NumField())

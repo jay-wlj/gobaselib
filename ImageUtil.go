@@ -3,9 +3,10 @@ package gobaselib
 import (
 	"bufio"
 	"bytes"
+
 	"github.com/jie123108/glog"
+
 	// "fmt"
-	"github.com/jie123108/imaging"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
@@ -13,6 +14,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/jie123108/imaging"
 )
 
 type Size struct {
@@ -87,7 +90,8 @@ func ResizeImgToBytes(srcImg image.Image, filename string, width, height int, en
 
 	var buf bytes.Buffer
 	buf_writer := bufio.NewWriter(&buf)
-	err = imaging.Encode(buf_writer, new_img, imaging.JPEG, quality)
+	//err = imaging.Encode(buf_writer, new_img, imaging.JPEG, quality)
+	err = imaging.Encode(buf_writer, new_img, imaging.JPEG)
 	if err != nil {
 		glog.Errorf("imaging.Encode(src: %s, width: %d, height: %d) failed! err: %v",
 			filename, width, height, err)
