@@ -68,7 +68,7 @@ type Server struct {
 }
 
 func NewServer() *Server {
-	return &Server{Engine: gin.New()}
+	return &Server{Engine: gin.Default()}
 }
 
 func (t *Server) AddRouter(f fnRouter) {
