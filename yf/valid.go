@@ -39,3 +39,22 @@ func ValidTel(telNum string) bool {
 	reg := regexp.MustCompile(regular)
 	return reg.MatchString(telNum)
 }
+
+func UnmarshalReq(c *gin.Context, req interface{}) bool {
+	var err error
+	switch c.Request.Method {
+	case "GET":
+		err = c.ShouldBindQuery(req)
+	default:
+		err = c.ShouldBindJSON(req)
+	}
+
+	if err != nil {
+		//if err := base.CheckQueryJsonField(c, &req); err != nil {
+		glog.Info("UnmarshalReq args invalid! err=", err)
+		yf.JSON_FailEx(c, yf.ERR_ARGS_INVALID, err.Error())
+		return false
+	}
+
+	return true
+}
