@@ -2,7 +2,7 @@ package yf
 
 import (
 	"regexp"
-
+	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
 	"gopkg.in/go-playground/validator.v9"
 )
@@ -52,7 +52,7 @@ func UnmarshalReq(c *gin.Context, req interface{}) bool {
 	if err != nil {
 		//if err := base.CheckQueryJsonField(c, &req); err != nil {
 		glog.Info("UnmarshalReq args invalid! err=", err)
-		yf.JSON_FailEx(c, yf.ERR_ARGS_INVALID, err.Error())
+		JSON_FailEx(c, yf.ERR_ARGS_INVALID, err.Error())
 		return false
 	}
 
