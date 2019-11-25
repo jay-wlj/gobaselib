@@ -120,7 +120,7 @@ func GetPostJsonData(c *gin.Context) ([]byte, error) {
 	if !exists {
 		if c.Request.Body != nil {
 			buf, _ = ioutil.ReadAll(c.Request.Body)
-			c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
+			c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf))
 		}
 		c.Set("viewbody", buf) // 注 需要保存body
 		//glog.Info("GetPostJsonData buf:", string(buf))
