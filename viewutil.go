@@ -2,6 +2,7 @@ package gobaselib
 
 import (
 	//"encoding/json"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"reflect"
@@ -117,8 +118,10 @@ func GetPostJsonData(c *gin.Context) ([]byte, error) {
 	buf := []byte{}
 	var err error
 	if !exists {
-		raw_body := c.Request.Body
-		buf, err = ioutil.ReadAll(raw_body)
+		if c.Request.Body != nil {
+			buf, _ = ioutil.ReadAll(c.Request.Body)
+			c.Request.Body = ioutil.NopCloser(bytes.NewReader(body))
+		}
 		c.Set("viewbody", buf) // 注 需要保存body
 		//glog.Info("GetPostJsonData buf:", string(buf))
 	} else {
