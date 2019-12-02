@@ -4,22 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func JsonOk(data interface{}) gin.H {
-	return gin.H{"ok": true, "reason": "", "data": data}
-}
-
-func JsonFail(reason string) gin.H {
-	return gin.H{"ok": false, "reason": reason}
-}
-
 func JSON_Ok(c *gin.Context, data interface{}) gin.H {
 	response := gin.H{"ok": true, "reason": "", "data": data}
 	JSON(c, 200, true, response)
 	return response
 }
 
-func JSON_Fail(c *gin.Context, reason string) gin.H {
+func JSON_Fail(c *gin.Context, reason string, err_msg ...string) gin.H {
 	response := gin.H{"ok": false, "reason": reason}
+	if len(err_msg) > 0 {
+		response["err_msg"] = err_msg
+	}
 	if reason == ERR_SERVER_ERROR {
 		JSON(c, 500, false, response)
 	} else {
