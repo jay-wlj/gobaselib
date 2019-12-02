@@ -163,6 +163,7 @@ func (this *RedisCache) SAddInt64(key string, ids []int64) (n int64, err error) 
 }
 
 func (this *RedisCache) SDiffInt64(key, key2 string) (vs []int64, err error) {
+	var vals []string
 	if vals, err = this.Client.SDiff(key, key2).Result(); err == nil {
 		vs, err = StringSliceToInt64Slice(vals)
 	}
