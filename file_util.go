@@ -7,12 +7,22 @@ import (
 	"io"
 	"math"
 	"os"
-	"regexp"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
+
 	"github.com/jie123108/glog"
 )
+
+func GetAppPath() string {
+	file, _ := exec.LookPath(os.Args[0])
+	path, _ := filepath.Abs(file)
+	index := strings.LastIndex(path, string(os.PathSeparator))
+
+	return path[:index+1]
+}
 
 func IsExist(filename string) bool {
 	_, err := os.Stat(filename)
@@ -158,16 +168,16 @@ func ListFilesEx(inputDir string, exts map[string]bool, grep string) ([]string, 
 
 	err := filepath.Walk(inputDir, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
-			ext := filepath.Ext(path)//取后缀.mkv,...
+			ext := filepath.Ext(path) //取后缀.mkv,...
 			if len(ext) > 1 {
 				ext = ext[1:]
 			}
-			if exts[ext] {//存在该后缀
-				if grep == "" {//正则表达式匹配条件，为空，不需要条件匹配
+			if exts[ext] { //存在该后缀
+				if grep == "" { //正则表达式匹配条件，为空，不需要条件匹配
 					fileList = append(fileList, path)
 				} else {
-					matched, _ := regexp.MatchString(grep, path)//正则表达式匹配条件
-					if matched {//匹配成功，添加文件
+					matched, _ := regexp.MatchString(grep, path) //正则表达式匹配条件
+					if matched {                                 //匹配成功，添加文件
 						fileList = append(fileList, path)
 					}
 				}
@@ -184,36 +194,36 @@ func ListFilesEx(inputDir string, exts map[string]bool, grep string) ([]string, 
 }
 
 //add by zwu
-func ListDirName(inputDir , grep string) ([]string, error) {
+func ListDirName(inputDir, grep string) ([]string, error) {
 	fileList := []string{}
 	if !IsExist(inputDir) {
 		return fileList, nil
 	}
-	
+
 	glog.Infof("ListDir inputDir:%s, grep:%s\n", inputDir, grep)
 	err := filepath.Walk(inputDir, func(path string, f os.FileInfo, err error) error {
 		//glog.Infof("ListDir path:%s\n", path)
 		if f.IsDir() {
 			//offset := strings.LastIndex(path, "\\")
 			//if offset >= 0 {
-				dirname := path
+			dirname := path
 			glog.Infof("ListDir path:%s, dirname:%s\n", path, dirname)
 			if dirname != "" {
-				if grep == "" {//正则表达式匹配条件，为空，不需要条件匹配
+				if grep == "" { //正则表达式匹配条件，为空，不需要条件匹配
 					fileList = append(fileList, path)
 				} else {
-					matched, _ := regexp.MatchString(grep, path)//正则表达式匹配条件
-					if matched {//匹配成功，添加文件
+					matched, _ := regexp.MatchString(grep, path) //正则表达式匹配条件
+					if matched {                                 //匹配成功，添加文件
 						fileList = append(fileList, path)
 					}
 				}
 			} else {
 				//glog.Errorf("unproc file: %s ext: %s\n", path, ext)
 			}
-			}
-			
-			//}
-				
+		}
+
+		//}
+
 		return nil
 	})
 	if err != nil {
@@ -221,14 +231,15 @@ func ListDirName(inputDir , grep string) ([]string, error) {
 	}
 	return fileList, nil
 }
+
 //add end
 
 func ListFiles(inputDir string, exts map[string]bool) ([]string, error) {
 	return ListFilesEx(inputDir, exts, "")
 }
 
-func IsInExtList(fileurl string, exts map[string]bool) bool{
-	ext := filepath.Ext(fileurl)//取后缀.mkv,...
+func IsInExtList(fileurl string, exts map[string]bool) bool {
+	ext := filepath.Ext(fileurl) //取后缀.mkv,...
 	if len(ext) > 1 {
 		ext = ext[1:]
 	}
