@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"time"
 
-	base "gobaselib"
+	base "github.com/jay-wlj/gobaselib"
 )
 
 func GetContentType(filename string) string {

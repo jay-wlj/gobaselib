@@ -1,9 +1,10 @@
-package gobaselib
+package base
 
 import (
 	"fmt"
-	"gobaselib/cache"
 	"testing"
+
+	"github.com/jay-wlj/gobaselib/cache"
 
 	"github.com/jie123108/glog"
 )

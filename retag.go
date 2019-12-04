@@ -1,11 +1,11 @@
-package gobaselib
+package base
 
 import (
 	"reflect"
 	"strings"
 
 	//"github.com/jay-wlj/pq"
-	"gobaselib/db"
+	"github.com/jay-wlj/gobaselib/db"
 
 	"github.com/shopspring/decimal"
 )

@@ -1,4 +1,4 @@
-package gobaselib
+package base
 
 /*
 const char* go_baselib_build_time(void)

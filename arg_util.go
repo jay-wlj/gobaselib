@@ -1,4 +1,4 @@
-package gobaselib
+package base
 
 import (
 	"strconv"

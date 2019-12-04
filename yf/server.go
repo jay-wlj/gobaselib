@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gobaselib/db"
+	"github.com/jay-wlj/gobaselib/db"
 	"github.com/jie123108/glog"
 )
 

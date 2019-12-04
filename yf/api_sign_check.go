@@ -5,11 +5,10 @@ import (
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
+	base "github.com/jay-wlj/gobaselib"
 	"github.com/jie123108/glog"
-
 	//"strings"
 	//"encoding/json"
-	base "gobaselib"
 )
 
 type ApiSignConfig struct {

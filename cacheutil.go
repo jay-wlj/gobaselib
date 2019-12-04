@@ -1,11 +1,11 @@
-package gobaselib
+package base
 
 import (
 	"encoding/json"
 	"sync"
 	"time"
 
-	"gobaselib/cache"
+	"github.com/jay-wlj/gobaselib/cache"
 	"github.com/jie123108/glog"
 )
 

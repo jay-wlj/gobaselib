@@ -1,11 +1,11 @@
-package gobaselib
+package base
 
 import (
 	// "fmt"
 	"testing"
 	"time"
 
-	"gobaselib/cache"
+	"github.com/jay-wlj/gobaselib/cache"
 )
 
 func TestClient(t *testing.T) {

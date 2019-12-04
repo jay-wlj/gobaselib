@@ -7,7 +7,7 @@ import (
 	"github.com/jie123108/glog"
 
 	//"strings"
-	base "gobaselib"
+	base "github.com/jay-wlj/gobaselib"
 )
 
 type ApiSignConfig struct {
