@@ -2,9 +2,9 @@ package yf
 
 import (
 	// "fmt"
-	base "github.com/jay-wlj/gobaselib"
+	base "gobaselib"
 
-	"github.com/jay-wlj/gobaselib/cache"
+	"gobaselib/cache"
 
 	// "github.com/jie123108/glog"
 	"testing"

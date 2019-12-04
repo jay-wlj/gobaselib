@@ -6,8 +6,8 @@ import (
 	//"github.com/fatih/structs"
 	//"github.com/jie123108/gocrc48"
 	//"github.com/jie123108/glog"
-	//base "github.com/jay-wlj/gobaselib"
-	"github.com/jay-wlj/gobaselib/db"
+	//base "gobaselib"
+	"gobaselib/db"
 	"gopkg.in/mgo.v2/bson"
 	//"time"
 )

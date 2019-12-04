@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/jay-wlj/gobaselib/cache"
+	"gobaselib/cache"
 
 	"github.com/jie123108/glog"
 )

@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	base "github.com/jay-wlj/gobaselib"
+	base "gobaselib"
 )
 
 type FileInfo struct {

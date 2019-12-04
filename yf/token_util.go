@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	base "github.com/jay-wlj/gobaselib"
+	base "gobaselib"
 
 	"github.com/jie123108/glog"
 )

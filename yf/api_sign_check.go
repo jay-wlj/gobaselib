@@ -9,7 +9,7 @@ import (
 
 	//"strings"
 	//"encoding/json"
-	base "github.com/jay-wlj/gobaselib"
+	base "gobaselib"
 )
 
 type ApiSignConfig struct {

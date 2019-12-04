@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	//"github.com/jay-wlj/pq"
-	"github.com/jay-wlj/gobaselib/db"
+	"gobaselib/db"
 
 	"github.com/shopspring/decimal"
 )

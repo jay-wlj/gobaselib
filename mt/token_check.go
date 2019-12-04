@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
 	//"strings"
-	base "github.com/jay-wlj/gobaselib"
+	base "gobaselib"
 
 	//"time"
 )

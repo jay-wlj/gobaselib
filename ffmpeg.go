@@ -3,8 +3,6 @@ package gobaselib
 import (
 	"bytes"
 	"fmt"
-	"github.com/fatih/structs"
-	"github.com/jie123108/glog"
 	"os"
 	"os/exec"
 	"path"
@@ -13,6 +11,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fatih/structs"
+	"github.com/jie123108/glog"
 )
 
 // 字幕相关文档：http://ffmpeg.org/ffmpeg-filters.html#subtitles-1
@@ -222,7 +223,7 @@ func GetVideoInfo(ffmpeg_bin, video_file string) (info *VideoInfo, err error) {
 	} else {
 		info.DAR, info.DarF = ProcDAR(arr[0] + ":" + arr[1])
 	}
-	glog.Infof("info.DAR:%s, info.DarF:%s, info.Width:%d, info.Height:%d\n", info.DAR, info.DarF, info.Width, info.Height)
+	glog.Infof("info.DAR:%s, info.DarF:%v, info.Width:%d, info.Height:%d\n", info.DAR, info.DarF, info.Width, info.Height)
 
 	//Audio Info 解析
 	audio_info = re_audio.FindStringSubmatch(outstr)
@@ -298,14 +299,14 @@ func SubtitleAdjust(style string, dar float32) string {
 }
 
 type ConvertArgs struct {
-	Size          string
-	VideoBitrate  int //kbps
-	AudioBitrate  int //kbps
-	AudioIndex	  int //audioindex
-	OverlaySubtitle int//picture subtitle
-	FFMpegArgs    string
-	SubtitleFile  string //字幕文件，可为空。或者指定一个视频文件。
-	SubtitleStyle string
+	Size            string
+	VideoBitrate    int //kbps
+	AudioBitrate    int //kbps
+	AudioIndex      int //audioindex
+	OverlaySubtitle int //picture subtitle
+	FFMpegArgs      string
+	SubtitleFile    string //字幕文件，可为空。或者指定一个视频文件。
+	SubtitleStyle   string
 }
 
 /**
@@ -347,7 +348,7 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 		fc_args = fmt.Sprintf("[0:v][0:s]overlay[ov]")
 		//fc_args = fmt.Sprintf("'[0:v]scale=%s[scale],[scale][0:s]overlay[ov]'", args.Size)
 		glog.Infof("fc_args:%s\n", fc_args)
-	}else {
+	} else {
 		vf_args = "scale=" + args.Size
 	}
 
@@ -358,18 +359,18 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 	var debug_str string
 	cmd_args := strings.Fields(args.FFMpegArgs)
 	if args.OverlaySubtitle >= 0 {
-		cmd_args = append(cmd_args, "-i", video_file, "-y", "-c:v", "libx264", "-filter_complex", fc_args, "-map", "[ov]", "-map", audio_args, /*"-t", "300",*/ "-b:v", VBitRate,
-		"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, localfile_tmp)
+		cmd_args = append(cmd_args, "-i", video_file, "-y", "-c:v", "libx264", "-filter_complex", fc_args, "-map", "[ov]", "-map", audio_args /*"-t", "300",*/, "-b:v", VBitRate,
+			"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, localfile_tmp)
 		debug_str = CommandFmt(F(ffmpeg_bin), args.FFMpegArgs, "-i", F(video_file),
-		"-y", "-c:v", "libx264", "-filter_complex", fc_args, "-map", "[ov]", "-map", audio_args, /*"-t", "300",*/"-b:v", VBitRate,
-		"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, F(localfile_tmp))
-		
-	}else {
-		cmd_args = append(cmd_args, "-i", video_file, "-y", "-c:v", "libx264", "-vf", vf_args, "-map", "0:v", "-map", audio_args, /*"-t", "300",*/ "-b:v", VBitRate,
-		"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, localfile_tmp)
+			"-y", "-c:v", "libx264", "-filter_complex", fc_args, "-map", "[ov]", "-map", audio_args /*"-t", "300",*/, "-b:v", VBitRate,
+			"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, F(localfile_tmp))
+
+	} else {
+		cmd_args = append(cmd_args, "-i", video_file, "-y", "-c:v", "libx264", "-vf", vf_args, "-map", "0:v", "-map", audio_args /*"-t", "300",*/, "-b:v", VBitRate,
+			"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, localfile_tmp)
 		debug_str = CommandFmt(F(ffmpeg_bin), args.FFMpegArgs, "-i", F(video_file),
-		"-y", "-c:v", "libx264", "-vf", vf_args, "-map", "0:v", "-map", audio_args, /*"-t", "300",*/ "-b:v", VBitRate,
-		"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, F(localfile_tmp))
+			"-y", "-c:v", "libx264", "-vf", vf_args, "-map", "0:v", "-map", audio_args /*"-t", "300",*/, "-b:v", VBitRate,
+			"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, F(localfile_tmp))
 		//glog.Infof("ffmpeg cmd: [%s]", cmd_args)
 		//cmd = exec.Command(ffmpeg_bin, cmd_args...)
 	}
@@ -383,7 +384,6 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 	// "-ss", "300", "-t", "20",
 	// -ss 300 -t 20
 	//glog.Infof("ffmpeg cmd: [%s]", debug_str)
-	
 
 	// cmd := exec.Command(ffmpeg_bin, "-i", video_file, "-y", "-c:v", "libx264", "-vf", "scale="+size,
 	// 	"-b:v", VBitRate, "-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, localfile_tmp)

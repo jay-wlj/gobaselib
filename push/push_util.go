@@ -3,7 +3,7 @@ package push
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jay-wlj/gobaselib/push/jpushclient"
+	"gobaselib/push/jpushclient"
 	"strings"
 	"time"
 	"unicode"

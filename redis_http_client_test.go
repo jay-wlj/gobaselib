@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jay-wlj/gobaselib/cache"
+	"gobaselib/cache"
 )
 
 func TestClient(t *testing.T) {

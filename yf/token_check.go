@@ -8,7 +8,7 @@ import (
 	//"strings"
 	"time"
 
-	base "github.com/jay-wlj/gobaselib"
+	base "gobaselib"
 )
 
 // http://www.gorillatoolkit.org/pkg/context
