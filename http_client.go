@@ -19,7 +19,7 @@ import (
 )
 
 func init() {
-	fmt.Printf("############# Build Time: %s #############\n", BuildTime)
+	//fmt.Printf("############# Build Time: %s #############\n", BuildTime)
 }
 
 const (
