@@ -36,6 +36,11 @@ type Config struct {
 	AuthServer string
 }
 
+type IRouters interface {
+	GetIgnoreSignList() map[string]bool
+	GetTokenList() map[string]bool
+}
+
 type fnRouter func() (prefix string, vs []RouterInfo)
 
 type routers []RouterInfo
@@ -76,11 +81,16 @@ func (t *Server) AddRouter(f fnRouter) {
 }
 
 func (t *Server) Start(cfg *Config) error {
+	t.InitRouter(func(rs IRouters) {
+		SignConfig.Debug = cfg.Debug
+		SignConfig.CheckSign = cfg.CheckSign
+		SignConfig.AppKeys = cfg.AppKeys
+		SignConfig.IgnoreSignList = rs.GetIgnoreSignList()
 
-	t.Use(Cors)
-	t.Use(Sign_Check)
-	t.Use(Token_Check)
-	t.Use(t.handlerwrap) // 处理请求中间件
+		TokenConfig.AccountServer = cfg.AuthServer
+		TokenConfig.Debug = cfg.Debug
+		TokenConfig.NeedTokenList = rs.GetTokenList()
+	}, Cors, Sign_Check, Token_Check)
 
 	var rs routers
 	for _, f := range t.frouters {
@@ -92,15 +102,6 @@ func (t *Server) Start(cfg *Config) error {
 		}
 		rs = append(rs, vs...)
 	}
-
-	SignConfig.Debug = cfg.Debug
-	SignConfig.CheckSign = cfg.CheckSign
-	SignConfig.AppKeys = cfg.AppKeys
-	SignConfig.IgnoreSignList = rs.GetIgnoreSignList()
-
-	TokenConfig.AccountServer = cfg.AuthServer
-	TokenConfig.Debug = cfg.Debug
-	TokenConfig.NeedTokenList = rs.GetTokenList()
 
 	//t.Use(middleware...)
 
@@ -127,6 +128,25 @@ func (t *Server) Start(cfg *Config) error {
 	return nil
 }
 
+func (t *Server) InitRouter(fn func(r IRouters), middlers ...gin.HandlerFunc) error {
+	t.Use(middlers...)
+	t.Use(t.handlerwrap) // 处理请求中间件
+
+	var rs routers
+	for _, f := range t.frouters {
+		prefix, vs := f()
+		t.routerRegister(prefix, vs)
+
+		for i := range vs {
+			vs[i].Url = prefix + vs[i].Url
+		}
+		rs = append(rs, vs...)
+	}
+
+	fn(&rs)
+	return nil
+}
+
 func (t *Server) routerRegister(prefix string, vs []RouterInfo) {
 	var g *gin.RouterGroup = &t.Engine.RouterGroup
 
@@ -135,12 +155,6 @@ func (t *Server) routerRegister(prefix string, vs []RouterInfo) {
 	}
 	for _, v := range vs {
 		g.Handle(v.Op, v.Url, v.Handler)
-		// switch v.Op {
-		// case common.HTTP_GET:
-		// 	g.GET(v.Url, v.Handler)
-		// case common.HTTP_POST:
-		// 	g.POST(v.Url, v.Handler)
-		// }
 	}
 }
 
