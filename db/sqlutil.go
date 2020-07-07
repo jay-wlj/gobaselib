@@ -21,17 +21,17 @@ func init() {
 // 默认db连接
 var m_db *gorm.DB
 
-type sqlDB struct {
+type PsqlDB struct {
 	*gorm.DB
 	tx_flag         int32    // 事务标志
 	fn_after_commit []func() // 提交后执行的代码
 }
 
-// func (v *sqlDB) GetDB() *gorm.DB {
+// func (v *PsqlDB) GetDB() *gorm.DB {
 // 	return v.DB
 // }
 
-func (v *sqlDB) ListPage(page, page_size int) *gorm.DB {
+func (v *PsqlDB) ListPage(page, page_size int) *gorm.DB {
 	if page <= 0 {
 		page = 1
 		glog.Error("ListPage page:", page, " <= 0")
@@ -43,16 +43,16 @@ func (v *sqlDB) ListPage(page, page_size int) *gorm.DB {
 	return v.Limit(page_size).Offset((page - 1) * page_size)
 }
 
-func (v *sqlDB) Begin() *sqlDB {
+func (v *PsqlDB) Begin() *PsqlDB {
 	if atomic.CompareAndSwapInt32(&v.tx_flag, 0, 1) {
 		v.DB = v.DB.Begin()
 		return v
 	} else {
-		glog.Debug("sqlDB is trasactions, ignore this time")
+		glog.Debug("PsqlDB is trasactions, ignore this time")
 	}
 	return nil
 }
-func (v *sqlDB) Commit() *sqlDB {
+func (v *PsqlDB) Commit() *PsqlDB {
 	if atomic.CompareAndSwapInt32(&v.tx_flag, 1, 0) {
 		v.DB = v.DB.Commit()
 		// 执行提交的代码
@@ -62,22 +62,22 @@ func (v *sqlDB) Commit() *sqlDB {
 			}
 		}
 	} else {
-		glog.Debug("sqlDB is commited! ignore this time")
+		glog.Debug("PsqlDB is commited! ignore this time")
 	}
 	return v
 }
 
-func (v *sqlDB) Rollback() *sqlDB {
+func (v *PsqlDB) Rollback() *PsqlDB {
 	if atomic.CompareAndSwapInt32(&v.tx_flag, 1, 0) {
 		v.DB = v.DB.Rollback()
 	} else {
-		glog.Debug("sqlDB is rollbacked! ignore this time")
+		glog.Debug("PsqlDB is rollbacked! ignore this time")
 	}
 	return v
 }
 
 // 提交后执行的代码
-func (v *sqlDB) AfterCommit(f ...func()) (err error) {
+func (v *PsqlDB) AfterCommit(f ...func()) (err error) {
 	if 1 != atomic.LoadInt32(&v.tx_flag) {
 		err = errors.New("is not tx db!")
 		return
@@ -141,15 +141,15 @@ func InitMysqlDb(mysqlUrl string, debug bool) (*gorm.DB, error) {
 }
 
 // 获取一个事务db
-func GetTxDB(c *gin.Context) *sqlDB {
-	var db *sqlDB
+func GetTxDB(c *gin.Context) *PsqlDB {
+	var db *PsqlDB
 	if c == nil {
 		db = GetDB().Begin()
 	} else {
 		// 是否已经存在
 		conn, exist := c.Get("sqldao")
 		if exist {
-			db, exist = conn.(*sqlDB)
+			db, exist = conn.(*PsqlDB)
 		}
 		if !exist {
 			db = GetDB().Begin() // 创建新事务db
@@ -159,6 +159,6 @@ func GetTxDB(c *gin.Context) *sqlDB {
 	return db
 }
 
-func GetDB() *sqlDB {
-	return &sqlDB{DB: m_db, tx_flag: 0} // 返回默认的db
+func GetDB() *PsqlDB {
+	return &PsqlDB{DB: m_db, tx_flag: 0} // 返回默认的db
 }
