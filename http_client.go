@@ -27,17 +27,12 @@ const (
 	ERR_SERVER_ERROR string = "ERR_SERVER_ERROR"
 )
 
-type ReqStats struct {
-	All time.Duration //请求总时间。
-}
-
 type Resp struct {
 	Error      error       // 出错信息。
 	RawBody    []byte      // Http返回的原始内容。
 	StatusCode int         // Http响应吗
 	Headers    http.Header // HTTP响应头
 	ReqDebug   string      // 请求的DEBUG串(curl格式)
-	Stats      ReqStats    //请求时间统计。
 }
 
 type OkJson struct {
@@ -45,11 +40,28 @@ type OkJson struct {
 	Ok     bool                   `json:"ok"`
 	Reason string                 `json:"reason"`
 	Data   map[string]interface{} `json:"data"`
-	Cached string                 //数据是否是缓存中获取 hit, miss
 }
 
-func (this *OkJson) Body() string {
-	return string(this.RawBody)
+func (res *OkJson) Body() string {
+	return string(res.RawBody)
+}
+
+func (res *OkJson) okJsonParse() *OkJson {
+	decoder := json.NewDecoder(bytes.NewBuffer(res.RawBody))
+	decoder.UseNumber()
+	err := decoder.Decode(&res)
+	if err != nil {
+		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
+		res.Error = err
+		res.Reason = ERR_SERVER_ERROR
+		res.StatusCode = 500
+		return res
+	}
+	if !res.Ok && res.Reason != "" && res.Error == nil {
+		res.Error = fmt.Errorf(res.Reason)
+	}
+
+	return res
 }
 
 func headerstr(headers map[string]string) string {
@@ -68,16 +80,6 @@ func headerstr(headers map[string]string) string {
 }
 
 var g_proxy_url string
-
-func HttpHeaderConv(src_headers http.Header) (headers map[string]string) {
-	headers = make(map[string]string)
-	if src_headers != nil {
-		for k, varr := range src_headers {
-			headers[k] = varr[0]
-		}
-	}
-	return
-}
 
 // proxyURL : "http://" + p.AppID + ":" + p.AppSecret + "@" + ProxyServer
 func SetProxyURL(proxyURL string) {
@@ -194,7 +196,7 @@ func getProxyHttpClient(proxy string) (client *http.Client, err error) {
 	return
 }
 
-func Http_req(method, uri string, body []byte, args map[string]string, headers map[string]string, timeout time.Duration) (*http.Response, error, string) {
+func http_req(method, uri string, body []byte, args map[string]string, headers map[string]string, timeout time.Duration) (*http.Response, error, string) {
 	client, err := getDefaultHttpClient()
 	if err != nil {
 		return nil, err, ""
@@ -251,7 +253,6 @@ func FormatHttpRequest(method, uri string, args, headers map[string]string, body
 
 func write_debug(begin time.Time, res *Resp, body_len *int) {
 	cost := time.Now().Sub(begin)
-	res.Stats.All = cost
 	seconds := cost.Seconds()
 	kbps := float64(0)
 	if seconds > 0 && *body_len > 0 {
@@ -262,7 +263,6 @@ func write_debug(begin time.Time, res *Resp, body_len *int) {
 
 func write_debug_ok_json(begin time.Time, res *OkJson, body_len *int) {
 	cost := time.Now().Sub(begin)
-	res.Stats.All = cost
 	seconds := cost.Seconds()
 	kbps := float64(0)
 	if seconds > 0 && *body_len > 0 {
@@ -271,12 +271,12 @@ func write_debug_ok_json(begin time.Time, res *OkJson, body_len *int) {
 	glog.Infof("REQUEST [ %s ] status: %d, body_len: %d, cost: %v, speed: %.3f kb/s", res.ReqDebug, res.StatusCode, *body_len, cost, kbps)
 }
 
-func HttpReqInternal(method, uri string, body []byte, args map[string]string, headers map[string]string, timeout time.Duration) *Resp {
+func httpReqInternal(method, uri string, body []byte, args map[string]string, headers map[string]string, timeout time.Duration) *Resp {
 	res := &Resp{}
 	begin := time.Now()
 	body_len := 0
 
-	resp, err, req_debug := Http_req(method, uri, body, args, headers, timeout)
+	resp, err, req_debug := http_req(method, uri, body, args, headers, timeout)
 	res.ReqDebug = req_debug
 	if resp != nil && resp.Body != nil {
 		defer resp.Body.Close() //一定要关闭resp.Body
@@ -290,7 +290,6 @@ func HttpReqInternal(method, uri string, body []byte, args map[string]string, he
 	}
 
 	res.Headers = resp.Header
-	// defer resp.Body.Close() //一定要关闭resp.Body
 	data, err := ioutil.ReadAll(resp.Body)
 	if data != nil {
 		body_len = len(data)
@@ -325,49 +324,24 @@ func HttpReqInternal(method, uri string, body []byte, args map[string]string, he
 }
 
 func HttpGet(uri string, headers map[string]string, timeout time.Duration) *Resp {
-	return HttpReqInternal("GET", uri, nil, nil, headers, timeout)
+	return httpReqInternal("GET", uri, nil, nil, headers, timeout)
 }
 
 func HttpPost(uri string, body []byte, headers map[string]string, timeout time.Duration) *Resp {
-	return HttpReqInternal("POST", uri, body, nil, headers, timeout)
-}
-
-func OkJsonParse(res *OkJson) *OkJson {
-	decoder := json.NewDecoder(bytes.NewBuffer(res.RawBody))
-	decoder.UseNumber()
-	err := decoder.Decode(&res)
-	if err != nil {
-		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
-		res.Error = err
-		res.Reason = ERR_SERVER_ERROR
-		res.StatusCode = 500
-		return res
-	}
-	if !res.Ok && res.Reason != "" && res.Error == nil {
-		res.Error = fmt.Errorf(res.Reason)
-	}
-
-	return res
+	return httpReqInternal("POST", uri, body, nil, headers, timeout)
 }
 
 func HttpReqJson(method, uri string, body []byte, args map[string]string, headers map[string]string, timeout time.Duration) *OkJson {
 	res := &OkJson{Ok: false, Reason: ERR_SERVER_ERROR}
-	res_http := HttpReqInternal(method, uri, body, args, headers, timeout)
-	res.Error = res_http.Error
-	res.RawBody = res_http.RawBody
-	res.StatusCode = res_http.StatusCode
-	res.Headers = res_http.Headers
-	res.ReqDebug = res_http.ReqDebug
-	res.Stats = res_http.Stats
+	res_http := httpReqInternal(method, uri, body, args, headers, timeout)
+	res.Resp = *res_http
 
 	if res_http.StatusCode >= 500 {
 		res.Reason = ERR_SERVER_ERROR
 		return res
 	}
 
-	OkJsonParse(res)
-
-	return res
+	return res.okJsonParse()
 }
 
 func HttpGetJson(uri string, headers map[string]string, timeout time.Duration) *OkJson {

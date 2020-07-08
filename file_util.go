@@ -68,36 +68,6 @@ func MkdirAll(dir string) error {
 	return os.MkdirAll(dir, os.ModePerm)
 }
 
-/**
-function _M.rename(oldfilename,newfilename)
-    local ret = tonumber(ffi.C.rename(oldfilename, newfilename))
-    if ret ~= 0 then
-        if ffi.errno() == 18 then --Invalid cross-device link
-            local ok, err = _M.safecopy(oldfilename, newfilename)
-            if ok then
-                ok, err = _M.unlink(oldfilename)
-            end
-
-            return ok, err
-        end
-        local errmsg = ffi.string(ffi.C.strerror(ffi.errno()))
-        return false, errmsg
-    end
-    return true
-end
-function _M.safecopy(src, dest)
-    local tmpfile = dest .. ".tmp"
-    local ok, err = _M.copy(src, tmpfile)
-    if ok then
-        ok = ffi.C.rename(tmpfile, dest)==0
-        if not ok then
-            err = ffi.string(ffi.C.strerror(ffi.errno()))
-        end
-    end
-    return ok, err
-end
-**/
-
 func Copy(src, dest string) error {
 	in, err := os.Open(src)
 	if err != nil {

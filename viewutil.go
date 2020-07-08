@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"reflect"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jie123108/glog"
@@ -17,13 +16,13 @@ import (
 )
 
 func GetUri(c *gin.Context) string {
-	uri := c.Request.RequestURI
-
-	pos := strings.Index(uri, "?")
-	if pos >= 0 && pos < len(uri) {
-		uri = uri[0:pos]
-	}
-	return uri
+	return c.Request.URL.Path
+	// uri := c.Request.RequestURI
+	// pos := strings.Index(uri, "?")
+	// if pos >= 0 && pos < len(uri) {
+	// 	uri = uri[0:pos]
+	// }
+	// return uri
 }
 
 func CheckStringToInt64(strvalue string) (value int64, err error) {
@@ -114,7 +113,7 @@ func CheckQueryFloat64Field(c *gin.Context, key string) (value float64, err erro
 }
 
 func GetPostJsonData(c *gin.Context) ([]byte, error) {
-	body, exists := c.Get("viewbody")
+	body, exists := c.Get("body")
 	buf := []byte{}
 	var err error
 	if !exists {
@@ -122,8 +121,7 @@ func GetPostJsonData(c *gin.Context) ([]byte, error) {
 			buf, _ = ioutil.ReadAll(c.Request.Body)
 			c.Request.Body = ioutil.NopCloser(bytes.NewReader(buf))
 		}
-		c.Set("viewbody", buf) // 注 需要保存body
-		//glog.Info("GetPostJsonData buf:", string(buf))
+		c.Set("body", buf) // 注 需要保存body
 	} else {
 		buf = body.([]byte)
 	}

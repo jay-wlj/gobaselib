@@ -19,6 +19,7 @@ require (
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a
+	github.com/lib/pq v1.1.1
 	github.com/nsqio/go-nsq v1.0.7
 	//github.com/shopspring/decimal v0.0.0-20191009025716-f1972eb1d1f5
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // 先用此版本,不会产生错误"pq: encode: unknown type for decimal.Decimal"

@@ -3,6 +3,7 @@ package base
 import (
 	"reflect"
 	"strings"
+	"time"
 
 	//"github.com/jay-wlj/pq"
 	"github.com/jay-wlj/gobaselib/db"
@@ -179,6 +180,8 @@ func FilterStruct(s interface{}, include bool, fields ...string) interface{} {
 	case reflect.Struct:
 		switch s.(type) {
 		case decimal.Decimal, *decimal.Decimal: // 将不需要展开的结构体列出
+			return s
+		case time.Time, *time.Time:
 			return s
 		case db.Jsonb:
 			return s

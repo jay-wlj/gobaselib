@@ -226,8 +226,6 @@ func UniqueIntSlice(slc []int) []int {
 
 // struct2map
 func StructToMap(v interface{}) (m map[string]interface{}) {
-	// t := reflect.TypeOf(v)
-	// vf := reflect.ValueOf(v)
 
 	m = make(map[string]interface{})
 	bt, err := json.Marshal(v)
@@ -236,23 +234,6 @@ func StructToMap(v interface{}) (m map[string]interface{}) {
 	}
 
 	json.Unmarshal(bt, &m)
-	// return
-	// m := make(map[string]interface{})
-	// if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
-	// 	str, err := json.Marshal(v)
-	// 	if err == nil {
-	// 		json.Unmarshal(str, &m)
-	// 	}
-	// } else {
-	// 	for i:=0; i<t.NumField(); i++ {
-	// 		//m[strings.ToLower(t.Field(i).Name)] = vf.Field(i).Interface()
-	// 		key := t.Field(i).Tag.Get(tag)
-	// 		keys := strings.Split(key, ",")
-	// 		if len(keys) > 0 && keys[0] != "-" {
-	// 			m[keys[0]] = vf.Field(i).Interface()
-	// 		}
-	// 	}
-	// }
 
 	return
 }
