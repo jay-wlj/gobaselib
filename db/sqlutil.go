@@ -27,10 +27,6 @@ type PsqlDB struct {
 	fn_after_commit []func() // 提交后执行的代码
 }
 
-// func (v *PsqlDB) GetDB() *gorm.DB {
-// 	return v.DB
-// }
-
 func (v *PsqlDB) ListPage(page, page_size int) *gorm.DB {
 	if page <= 0 {
 		page = 1
