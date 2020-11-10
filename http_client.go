@@ -343,3 +343,39 @@ func HttpGetJson(uri string, headers map[string]string, timeout time.Duration) *
 func HttpPostJson(uri string, body []byte, headers map[string]string, timeout time.Duration) *OkJson {
 	return HttpReqJson("POST", uri, body, nil, headers, timeout)
 }
+
+func HttpGetJsonRes(uri string, headers map[string]string, timeout time.Duration, v interface{}) (*Resp, error) {
+	res := httpReqInternal("GET", uri, nil, nil, headers, timeout)
+
+	if res.StatusCode >= 500 {
+		return res, errors.New("ERR_SERVER_ERROR")
+	}
+
+	decoder := json.NewDecoder(bytes.NewBuffer(res.RawBody))
+	decoder.UseNumber()
+	err := decoder.Decode(v)
+	if err != nil {
+		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
+		return res, err
+	}
+
+	return res, nil
+}
+
+func HttpPostJsonRes(uri string, body []byte, headers map[string]string, timeout time.Duration, v interface{}) (*Resp, error) {
+	res := httpReqInternal("POST", uri, body, nil, headers, timeout)
+
+	if res.StatusCode >= 500 {
+		return res, errors.New("ERR_SERVER_ERROR")
+	}
+
+	decoder := json.NewDecoder(bytes.NewBuffer(res.RawBody))
+	decoder.UseNumber()
+	err := decoder.Decode(v)
+	if err != nil {
+		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
+		return res, err
+	}
+
+	return res, nil
+}
