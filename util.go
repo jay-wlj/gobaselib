@@ -201,6 +201,9 @@ func UniqueStringSlice(slc []string) []string {
 	result := []string{}
 	tempMap := map[string]bool{} // 存放不重复主键
 	for _, e := range slc {
+		if e == "" {
+			continue
+		}
 		l := len(tempMap)
 		tempMap[e] = true
 		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
