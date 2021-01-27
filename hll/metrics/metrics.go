@@ -108,7 +108,7 @@ func ConsulRegCounter(reg_name, reg_id, errorStr string) {
 		"error":           errorStr,
 		"hll_appid":       appid,
 		"hll_data_type":   "business",
-		"hll_metric_type": "histogram",
+		"hll_metric_type": "counter",
 		"hll_env":         env,
 		"hll_ip":          util.LocalIP(),
 	}).Inc()
