@@ -40,6 +40,18 @@ func DownRequestHisgorm(down_uri string, retErr string, begin time.Time) {
 	}).Observe(time.Now().Sub(begin).Seconds())
 }
 
+func ApolloRequestHistgrom(down_uri string, retErr string, begin time.Time) {
+	apolloRequestHistgrom.With(prometheus.Labels{
+		"error":           retErr,
+		"downstream_url":  down_uri,
+		"hll_appid":       appid,
+		"hll_data_type":   "business",
+		"hll_metric_type": "histogram",
+		"hll_env":         env,
+		"hll_ip":          util.LocalIP(),
+	}).Observe(time.Now().Sub(begin).Seconds())
+}
+
 func PanicCounter(uri string) {
 	panicCounter.With(prometheus.Labels{
 		"req_url":         uri,
@@ -87,4 +99,17 @@ func PromHisgoram(end_point string, begin time.Time) {
 		"hll_env":         env,
 		"hll_ip":          util.LocalIP(),
 	}).Observe(time.Now().Sub(begin).Seconds())
+}
+
+func ConsulRegCounter(reg_name, reg_id, errorStr string) {
+	consulCounter.With(prometheus.Labels{
+		"reg_name":        reg_name,
+		"reg_id":          reg_id,
+		"error":           errorStr,
+		"hll_appid":       appid,
+		"hll_data_type":   "business",
+		"hll_metric_type": "histogram",
+		"hll_env":         env,
+		"hll_ip":          util.LocalIP(),
+	}).Inc()
 }

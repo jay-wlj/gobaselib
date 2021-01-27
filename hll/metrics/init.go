@@ -53,8 +53,13 @@ var (
 		Help: "the total number of redis processed events",
 	}, []string{"hll_data_type", "error", "downstream_url", "hll_metric_type", "hll_appid", "hll_env", "hll_ip"})
 
-	ConsulRegCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+	consulCounter = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "hllci_consul_reg_count",
 		Help: "the total number of reg in the consul",
 	}, []string{"reg_name", "reg_id", "error", "hll_data_type", "hll_metric_type", "hll_appid", "hll_env", "hll_ip"})
+
+	apolloRequestHistgrom = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name: "hllci_apollo_http_request_seconds",
+		Help: "the total number of redis processed events",
+	}, []string{"hll_data_type", "error", "downstream_url", "hll_metric_type", "hll_appid", "hll_env", "hll_ip"})
 )
