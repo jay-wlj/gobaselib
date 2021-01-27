@@ -113,3 +113,22 @@ func ConsulRegCounter(reg_name, reg_id, errorStr string) {
 		"hll_ip":          util.LocalIP(),
 	}).Inc()
 }
+
+func ConsulDiscoverCounter(service string, err error) {
+	errStr := "0"
+	var errMsg string
+	if err != nil {
+		errStr = "1"
+		errMsg = err.Error()
+	}
+	consulDiscoverCounter.With(prometheus.Labels{
+		"service":         service,
+		"error":           errStr,
+		"err_msg":         errMsg,
+		"hll_appid":       appid,
+		"hll_data_type":   "business",
+		"hll_metric_type": "counter",
+		"hll_env":         env,
+		"hll_ip":          util.LocalIP(),
+	}).Inc()
+}
