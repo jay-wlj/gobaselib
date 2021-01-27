@@ -23,6 +23,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsqio/go-nsq v1.0.7
 	github.com/pkg/sftp v1.12.0
+	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
 	//github.com/shopspring/decimal v0.0.0-20191009025716-f1972eb1d1f5
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // 先用此版本,不会产生错误"pq: encode: unknown type for decimal.Decimal"
 	github.com/sirupsen/logrus v1.2.0
