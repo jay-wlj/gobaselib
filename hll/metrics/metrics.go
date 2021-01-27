@@ -1,11 +1,11 @@
-package metric
+package metrics
 
 import (
 	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/jay-wlj/gobaselib/hll/metric/util"
+	"github.com/jay-wlj/gobaselib/hll/metrics/util"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
