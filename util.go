@@ -114,6 +114,10 @@ func Uint64SliceToString(values []uint64, splite string) (strvalue string) {
 	return
 }
 func StringToIntSlice(str string, splite string) (ivalues []int) {
+	str = strings.TrimSpace(str)
+	if str == "" {
+		return nil
+	}
 	strarr := strings.Split(str, splite)
 	for _, strvalue := range strarr {
 		ivalue, _ := StringToInt(strvalue)
@@ -123,6 +127,10 @@ func StringToIntSlice(str string, splite string) (ivalues []int) {
 }
 
 func StringToInt64Slice(str string, splite string) (ivalues []int64) {
+	str = strings.TrimSpace(str)
+	if str == "" {
+		return nil
+	}
 	strarr := strings.Split(str, splite)
 	for _, strvalue := range strarr {
 		ivalue, _ := StringToInt64(strvalue)
