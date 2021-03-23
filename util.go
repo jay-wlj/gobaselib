@@ -263,3 +263,19 @@ func SensitiveTel(tel string) string {
 	}
 	return tel
 }
+
+func StringSliceToInt64Slice(vals []string) (vs []int64, err error) {
+	vs = []int64{}
+	if vals == nil {
+		return
+	}
+
+	var n int64
+	for _, v := range vals {
+		if n, err = strconv.ParseInt(v, 10, 64); err != nil {
+			return
+		}
+		vs = append(vs, n)
+	}
+	return
+}
