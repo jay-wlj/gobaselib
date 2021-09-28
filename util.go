@@ -26,6 +26,11 @@ func StringToInt64(str string) (value int64, err error) {
 	return
 }
 
+func StringToUInt64(str string) (value uint64, err error) {
+	value, err = strconv.ParseUint(str, 10, 64)
+	return
+}
+
 func StringToFloat64(str string) (value float64, err error) {
 	value, err = strconv.ParseFloat(str, 64)
 	return
@@ -134,6 +139,19 @@ func StringToInt64Slice(str string, splite string) (ivalues []int64) {
 	strarr := strings.Split(str, splite)
 	for _, strvalue := range strarr {
 		ivalue, _ := StringToInt64(strvalue)
+		ivalues = append(ivalues, ivalue)
+	}
+	return
+}
+
+func StringToUInt64Slice(str string, splite string) (ivalues []uint64) {
+	str = strings.TrimSpace(str)
+	if str == "" {
+		return nil
+	}
+	strarr := strings.Split(str, splite)
+	for _, strvalue := range strarr {
+		ivalue, _ := StringToUInt64(strvalue)
 		ivalues = append(ivalues, ivalue)
 	}
 	return
