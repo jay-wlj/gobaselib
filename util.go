@@ -223,6 +223,20 @@ func UniqueInt64Slice(slc []int64) []int64 {
 }
 
 // 通过map主键唯一的特性过滤重复元素
+func UniqueUInt64Slice(slc []uint64) []uint64 {
+	result := []uint64{}
+	tempMap := map[uint64]bool{} // 存放不重复主键
+	for _, e := range slc {
+		l := len(tempMap)
+		tempMap[e] = true
+		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
+			result = append(result, e)
+		}
+	}
+	return result
+}
+
+// 通过map主键唯一的特性过滤重复元素
 func UniqueStringSlice(slc []string) []string {
 	result := []string{}
 	tempMap := map[string]bool{} // 存放不重复主键
