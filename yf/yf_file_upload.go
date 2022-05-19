@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"io/ioutil"
 	"math"
 	"mime/multipart"

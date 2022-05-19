@@ -3,7 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"reflect"
 	"strconv"
 	"strings"

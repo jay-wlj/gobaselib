@@ -2,7 +2,7 @@ package yf
 
 import (
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"strings"
 	"testing"
 )

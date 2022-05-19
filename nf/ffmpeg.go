@@ -3,7 +3,7 @@ package base
 import (
 	"bytes"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"os"
 	"os/exec"
 	"path"

@@ -1,7 +1,7 @@
 package mt
 
 import (
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"

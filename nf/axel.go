@@ -1,7 +1,7 @@
 package base
 
 import (
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"net/url"
 	"os"
 	"os/exec"

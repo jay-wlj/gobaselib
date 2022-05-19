@@ -3,7 +3,8 @@ package base
 import (
 	"bufio"
 	"bytes"
-	"gobaselib/log"
+
+	"github.com/jay-wlj/gobaselib/log"
 
 	// "fmt"
 	"image"

@@ -3,7 +3,7 @@ package push
 import (
 	"encoding/json"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"strings"
 	"time"
 	"unicode"

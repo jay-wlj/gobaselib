@@ -2,8 +2,9 @@ package cache
 
 import (
 	"fmt"
-	"gobaselib/log"
-	//_ "github.com/jinzhu/gorm/dialects/postgres"
+
+	"github.com/jay-wlj/gobaselib/log"
+	//_ "gorm.io/gorm/dialects/postgres"
 )
 
 var g_rediscache *RedisCache

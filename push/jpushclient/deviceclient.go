@@ -6,7 +6,7 @@ import (
 	//"strings"
 	"encoding/json"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 )
 
 const (

@@ -2,7 +2,7 @@ package mt
 
 import (
 	// "fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 
 	"github.com/gin-gonic/gin"
 	//"strings"

@@ -1,6 +1,6 @@
 package yf
 
-import "gobaselib/log"
+import "github.com/jay-wlj/gobaselib/log"
 
 const (
 	ERR_ARGS_INVALID         string = "ERR_ARGS_INVALID"         // 参数错误

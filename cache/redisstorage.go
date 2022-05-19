@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"reflect"
 )
 

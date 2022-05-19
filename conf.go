@@ -2,7 +2,7 @@ package base
 
 import (
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"io/ioutil"
 	"path/filepath"
 

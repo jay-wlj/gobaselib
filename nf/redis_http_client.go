@@ -3,7 +3,7 @@ package base
 import (
 	// "fmt"
 	"encoding/json"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"time"
 
 	"github.com/jay-wlj/gobaselib/cache"

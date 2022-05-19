@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"io"
 	"math"
 	"os"

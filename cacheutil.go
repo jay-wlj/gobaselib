@@ -2,7 +2,7 @@ package base
 
 import (
 	"encoding/json"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"sync"
 	"time"
 

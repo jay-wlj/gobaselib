@@ -2,8 +2,9 @@ package db
 
 import (
 	"fmt"
-	"gobaselib/log"
 	"time"
+
+	"github.com/jay-wlj/gobaselib/log"
 
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

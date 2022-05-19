@@ -3,7 +3,7 @@ package yf
 import (
 	"context"
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"net/http"
 	"os"
 	"os/signal"

@@ -2,7 +2,7 @@ package base
 
 import (
 	"fmt"
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"testing"
 
 	"github.com/jay-wlj/gobaselib/cache"

@@ -1,7 +1,7 @@
 package yf
 
 import (
-	"gobaselib/log"
+	"github.com/jay-wlj/gobaselib/log"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
