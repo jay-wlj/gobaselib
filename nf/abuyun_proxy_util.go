@@ -2,7 +2,7 @@ package base
 
 import (
 	"fmt"
-	"github.com/jie123108/glog"
+	"gobaselib/log"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +19,7 @@ func GetABuYunStatus() (status *ABuYunStatus) {
 	status_uri := "http://proxy.abuyun.com/current-ip"
 	res := HttpGet(status_uri, nil, time.Second*10)
 	if res.StatusCode != 200 {
-		glog.Errorf("request [%s] failed! status: %d, err: %v", res.ReqDebug, res.StatusCode, res.Error)
+		log.Errorf("request [%s] failed! status: %d, err: %v", res.ReqDebug, res.StatusCode, res.Error)
 		return
 	}
 	body := strings.TrimSpace(string(res.RawBody))
@@ -44,15 +44,15 @@ var g_status *ABuYunStatus
 func GetABuYunStatusEx() *ABuYunStatus {
 	now := time.Now().Unix()
 	diff := int(now - pre_fetch_time)
-	// glog.Infof(" now [%d] - pre_fetch_time [%d] = %d", now, pre_fetch_time, diff)
+	// log.Infof(" now [%d] - pre_fetch_time [%d] = %d", now, pre_fetch_time, diff)
 
 	if g_status == nil || diff >= 5 || g_status.RestSecond < diff {
 		pre_fetch_time = now
-		// glog.Infof("------------------ Get New Status ------------------")
+		// log.Infof("------------------ Get New Status ------------------")
 		g_status = GetABuYunStatus()
 		return g_status
 	}
-	// glog.Infof("------------------ Get Status From cache ------------------")
+	// log.Infof("------------------ Get Status From cache ------------------")
 	status := &ABuYunStatus{}
 	status.CurrentIP = g_status.CurrentIP
 	status.UsedSecond = g_status.UsedSecond + diff

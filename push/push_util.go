@@ -3,12 +3,13 @@ package push
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jay-wlj/gobaselib/push/jpushclient"
+	"gobaselib/log"
 	"strings"
 	"time"
 	"unicode"
 
-	"github.com/jie123108/glog"
+	"github.com/jay-wlj/gobaselib/push/jpushclient"
+
 	"github.com/zwczou/jpush"
 )
 
@@ -30,17 +31,17 @@ func InitPush(map_appkeys map[string]string, mongourl string, timeout time.Durat
 func QueryUserAppKey(user_ids []int64) (map[string][]int64, error) {
 	dao, err := NewJPushBindDao()
 	if nil != err {
-		glog.Errorf("NewJPushBindDao(%v) failed! err:%v", user_ids, err)
+		log.Errorf("NewJPushBindDao(%v) failed! err:%v", user_ids, err)
 		return make(map[string][]int64), err
 	}
 
 	valueinfos, err := dao.FindByUserIds(user_ids)
 	if nil != err {
-		glog.Errorf("QueryUserAppKey.dao.Find failed, err:%v", err)
+		log.Errorf("QueryUserAppKey.dao.Find failed, err:%v", err)
 		return make(map[string][]int64), err
 	}
 
-	glog.Infof("find user_ids:%v keys:%v", user_ids, valueinfos)
+	log.Infof("find user_ids:%v keys:%v", user_ids, valueinfos)
 	map_keys := make(map[string][]int64)
 	map_keys_once := make(map[string]map[int64]bool)
 	map_user_find_keys := make(map[int64]bool)
@@ -62,7 +63,7 @@ func QueryUserAppKey(user_ids []int64) (map[string][]int64, error) {
 	//找不到属于那一个应用的用户,所有平台广播一下
 	for _, user_id := range user_ids {
 		if !map_user_find_keys[user_id] {
-			glog.Infof("user_id:%v not find appkey, broadcat all appkey", user_id)
+			log.Infof("user_id:%v not find appkey, broadcat all appkey", user_id)
 			for appkey, _ := range pushconfig.MapAppKeys {
 				if nil == map_keys[appkey] {
 					map_keys[appkey] = []int64{}
@@ -81,7 +82,7 @@ func PushBind(appkey string, user_id int64, reg_id string) error {
 	str_user_id := fmt.Sprintf("%v", user_id)
 	/*secret, isexist := pushconfig.MapAppKeys[appkey]
 	if !isexist {
-		glog.Errorf("JPushBind Failed! AppKey not found")
+		log.Errorf("JPushBind Failed! AppKey not found")
 		return fmt.Errorf("JPushBind Failed! AppKey not found")
 	}*/
 
@@ -93,13 +94,13 @@ func PushBind(appkey string, user_id int64, reg_id string) error {
 
 	dao, err := NewJPushBindDao()
 	if nil != err {
-		glog.Errorf("NewJPushBindDao(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
+		log.Errorf("NewJPushBindDao(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
 		return err
 	}
 
 	err = dao.Upsert(reg_id, appkey, user_id)
 	if nil != err {
-		glog.Errorf("dao.Upsert(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
+		log.Errorf("dao.Upsert(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
 		return err
 	}
 
@@ -114,7 +115,7 @@ func PushUnBind(appkey string, user_id int64, reg_id string) error {
 
 	/*secret, isexist := pushconfig.MapAppKeys[appkey]
 	if !isexist {
-		glog.Errorf("JPushBind Failed! AppKey not found")
+		log.Errorf("JPushBind Failed! AppKey not found")
 		return fmt.Errorf("JPushBind Failed! AppKey not found")
 	}*/
 
@@ -122,19 +123,19 @@ func PushUnBind(appkey string, user_id int64, reg_id string) error {
 	/*
 		err := jpushclient.JPushUnBind(secret, appkey, str_user_id, reg_id)
 		if nil != err {
-			glog.Errorf("jpushun(%v,%v)bind failed! err:%v", reg_id, str_user_id, err)
+			log.Errorf("jpushun(%v,%v)bind failed! err:%v", reg_id, str_user_id, err)
 			return err
 		}*/
 
 	dao, err := NewJPushBindDao()
 	if nil != err {
-		glog.Errorf("NewJPushBindDao(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
+		log.Errorf("NewJPushBindDao(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
 		return err
 	}
 
 	err = dao.DeleteByRegId(reg_id)
 	if nil != err {
-		glog.Errorf("dao.Delete(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
+		log.Errorf("dao.Delete(%v,%v,%v) failed! err:%v", reg_id, str_user_id, appkey, err)
 		return err
 	}
 
@@ -145,7 +146,7 @@ func Query(reg_id string) (ret int, err error) {
 	for appkey, secret := range pushconfig.MapAppKeys {
 		devicesclient := jpushclient.NewDevicesClient(secret, appkey)
 		ret, err := devicesclient.Query(reg_id)
-		glog.Errorf("ret:%v err:%v", ret, err)
+		log.Errorf("ret:%v err:%v", ret, err)
 	}
 	return
 }
@@ -177,14 +178,14 @@ func UserNotice(
 		//appkey := "66eaf7bd2b39b8ecdcd966a6"
 		secret, isexist := pushconfig.MapAppKeys[appkey]
 		if !isexist {
-			glog.Errorf("JPushBind Failed! AppKey(%v) uids(%v) not found", appkey, uids)
+			log.Errorf("JPushBind Failed! AppKey(%v) uids(%v) not found", appkey, uids)
 			continue
 			//return "", fmt.Errorf("JPushBind Failed! AppKey not found")
 		}
 
 		msg_id, err = jpushclient.JPushUserNotice(secret, appkey, uids, ext_tags, ext_tags_and, content, title, extras, pushconfig.PushDebug)
 		if nil != err {
-			glog.Errorf("jpushclient.jpushusernotice(%v,%v,%v,%v)", uids, content, title, extras)
+			log.Errorf("jpushclient.jpushusernotice(%v,%v,%v,%v)", uids, content, title, extras)
 			//return "", err
 		}
 
@@ -212,7 +213,7 @@ func BroadNotice(
 	for appkey, secret := range pushconfig.MapAppKeys {
 		msg_id, err = jpushclient.JPushNotice(secret, appkey, platforms, alias, tags, tags_and, content, title, extras, pushconfig.PushDebug)
 		if nil != err {
-			glog.Errorf("jpushclient.BroadNotice(%v,%v) failed!", secret, appkey)
+			log.Errorf("jpushclient.BroadNotice(%v,%v) failed!", secret, appkey)
 		}
 	}
 
@@ -290,10 +291,10 @@ func ScheduleNoticeV2(
 	content string,
 	title string,
 	extras map[string]interface{}) (schedule_id_android string, schedule_id_ios string, err error) {
-	// glog.Infof("xxxx --------- 0001 ------------")
+	// log.Infof("xxxx --------- 0001 ------------")
 	// 因为ios有bug, 所以分开推送.
 	// if 0 == len(mp_platform_tags) && 0 == len(mp_platform_tags_and) {
-	// 	//glog.Infof("mp_platform_tags: %v, mp_platform_tags_and: %v", mp_platform_tags, mp_platform_tags_and)
+	// 	//log.Infof("mp_platform_tags: %v, mp_platform_tags_and: %v", mp_platform_tags, mp_platform_tags_and)
 	// 	ext_tags := []string{}
 	// 	ext_tags_and := []string{}
 	// 	sid, err_ := ScheduleNotice(user_ids, ext_tags, ext_tags_and, name, enabled, start, end, time_, time_unit, frequency, points, []string{}, content, title, extras)
@@ -303,7 +304,7 @@ func ScheduleNoticeV2(
 	// 	return
 	// }
 
-	//glog.Infof("xxxx --------- 0002 ------------")
+	//log.Infof("xxxx --------- 0002 ------------")
 
 	android := "android"
 	ios := "ios"
@@ -311,18 +312,18 @@ func ScheduleNoticeV2(
 	ios_tags, ios_tags_and := PlatfromTagsAndTagsAnd(ios, mp_platform_tags, mp_platform_tags_and)
 	schedule_id_android, err = ScheduleNotice(user_ids, android_tags, android_tags_and, name, enabled, start, end, time_, time_unit, frequency, points, []string{android}, content, title, extras)
 	if err != nil {
-		glog.Errorf("schedulenotice android(%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v)  failed! err:%v",
+		log.Errorf("schedulenotice android(%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v)  failed! err:%v",
 			user_ids, android_tags, android_tags_and, name, enabled, start, end, time_, time_unit,
 			frequency, points, content, title, extras, err)
 		return
 	}
 
-	//glog.Infof("xxxx --------- 0003 ------------")
+	//log.Infof("xxxx --------- 0003 ------------")
 	push := extras["push"]
 	// ios老版本, push节点只能解析string类型的信息(老版本的信息).所以为了兼容, 把消息改回原来的格式了.
 	body, _ := json.Marshal(push)
 	extras["push"] = string(body)
-	// glog.Infof("xxxx push msg to ios: %v", extras)
+	// log.Infof("xxxx push msg to ios: %v", extras)
 	schedule_id_ios, err = ScheduleNotice(user_ids, ios_tags, ios_tags_and, name, enabled, start, end, time_, time_unit, frequency, points, []string{ios}, content, title, extras)
 	return schedule_id_android, schedule_id_ios, err
 }
@@ -391,7 +392,7 @@ func JPushScheduleNotice(secret, appkey string,
 	}
 
 	body, _ := json.Marshal(payload)
-	glog.Infof("push content: %s", body)
+	log.Infof("push content: %s", body)
 
 	schedulePayload := &jpush.SchedulePayload{
 		Name:    name,
@@ -405,7 +406,7 @@ func JPushScheduleNotice(secret, appkey string,
 	}
 	client := jpush.NewJpushClient(appkey, secret)
 	schedule_id, err = client.ScheduleCreate(schedulePayload)
-	glog.Infof("jpush schedule %s - %s", schedule_id, err)
+	log.Infof("jpush schedule %s - %s", schedule_id, err)
 	//client.ScheduleDelete(schedule_id)
 	return
 }
@@ -443,32 +444,32 @@ func ScheduleNotice(
 			//appkey := "66eaf7bd2b39b8ecdcd966a6"
 			secret, isexist := pushconfig.MapAppKeys[appkey]
 			if !isexist {
-				glog.Errorf("JPushBind Failed! AppKey(%v) uids(%v) not found", appkey, uids)
+				log.Errorf("JPushBind Failed! AppKey(%v) uids(%v) not found", appkey, uids)
 				continue
 				//return 0, fmt.Errorf("JPushBind Failed! AppKey not found")
 			}
-			glog.Infof("JPushScheduleNotice(%v, %v, %v, %v, %v, %v, %v, %v, %v,%v, %v, %v, %v, %v, %v, %v, %v, %v)",
+			log.Infof("JPushScheduleNotice(%v, %v, %v, %v, %v, %v, %v, %v, %v,%v, %v, %v, %v, %v, %v, %v, %v, %v)",
 				secret, appkey, uids, ext_tags, ext_tags_and, name, enabled, start, end,
 				time_, time_unit, frequency, points, platforms, content, title, extras, pushconfig.PushDebug)
 
 			schedule_id, err = JPushScheduleNotice(secret, appkey, uids, ext_tags, ext_tags_and, name, enabled, start, end,
 				time_, time_unit, frequency, points, platforms, content, title, extras, pushconfig.PushDebug)
 			if nil != err {
-				glog.Errorf("jpushclient.JPushScheduleNotice(%v,%v,%v,%v)", uids, content, title, extras)
+				log.Errorf("jpushclient.JPushScheduleNotice(%v,%v,%v,%v)", uids, content, title, extras)
 				//return 0, err
 			}
 		}
 
 	} else {
 		for appkey, secret := range pushconfig.MapAppKeys {
-			glog.Infof("JPushScheduleNotice(%v, %v, %v, %v, %v, %v, %v, %v, %v,%v, %v, %v, %v, %v, %v, %v, %v, %v)",
+			log.Infof("JPushScheduleNotice(%v, %v, %v, %v, %v, %v, %v, %v, %v,%v, %v, %v, %v, %v, %v, %v, %v, %v)",
 				secret, appkey, user_ids, ext_tags, ext_tags_and, name, enabled, start, end,
 				time_, time_unit, frequency, points, platforms, content, title, extras, pushconfig.PushDebug)
 
 			schedule_id, err = JPushScheduleNotice(secret, appkey, user_ids, ext_tags, ext_tags_and, name, enabled, start, end,
 				time_, time_unit, frequency, points, platforms, content, title, extras, pushconfig.PushDebug)
 			if nil != err {
-				glog.Errorf("jpushclient.BroadNotice(%v,%v) failed!", secret, appkey)
+				log.Errorf("jpushclient.BroadNotice(%v,%v) failed!", secret, appkey)
 			}
 		}
 

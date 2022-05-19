@@ -2,9 +2,9 @@ package db
 
 import (
 	"fmt"
+	"gobaselib/log"
 	"time"
 
-	"github.com/jie123108/glog"
 	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -26,10 +26,10 @@ func InitMgo(mongo_url string, timeout time.Duration) (*mgo.Session, error) {
 	var err error
 	newsession, err := mgo.DialWithTimeout(mongo_url, timeout)
 	if err != nil {
-		glog.Errorf("open mongodb(%s) failed! err: %v", mongo_url, err)
+		log.Errorf("open mongodb(%s) failed! err: %v", mongo_url, err)
 		return nil, err
 	} else {
-		glog.Infof("open mongodb(%s) ok!", mongo_url)
+		log.Infof("open mongodb(%s) ok!", mongo_url)
 	}
 	newsession.SetMode(mgo.Eventual, true)
 	return newsession, nil
@@ -103,7 +103,7 @@ func (this *MongoDao) GetNextId(key string) (newId int, err error) {
 
 	var doc = AutoId{}
 	info, err := coll.Find(bson.M{"name": key}).Apply(change, &doc)
-	glog.Infof("coll.Find.Apply(%v)", info)
+	log.Infof("coll.Find.Apply(%v)", info)
 	newId = doc.Autoid
 
 	return
@@ -120,7 +120,7 @@ func (this *MongoDao) EnsureIndexs(keys []string) (err error) {
 		}
 		err = this.coll.EnsureIndex(index)
 		if err != nil {
-			glog.Errorf("EnsureIndexs key:%s,error:%s", key, err.Error())
+			log.Errorf("EnsureIndexs key:%s,error:%s", key, err.Error())
 			return
 		}
 	}
@@ -141,7 +141,7 @@ func (this *MongoDao) UpdateAll(selector interface{}, value interface{}) (info *
 
 func (this *MongoDao) Upsert(selector interface{}, value interface{}) error {
 	info, err := this.coll.Upsert(selector, value)
-	glog.Info("coll.upsert(%v), err:%v", info, err)
+	log.Info("coll.upsert(%v), err:%v", info, err)
 
 	return err
 }
@@ -167,7 +167,7 @@ func (this *MongoDao) Find(selector interface{}, fields interface{}, page int, p
 
 	err = query.All(result)
 	if err != nil {
-		glog.Errorf("err:%v query:%v", err, query)
+		log.Errorf("err:%v query:%v", err, query)
 	}
 	return
 }

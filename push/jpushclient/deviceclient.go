@@ -6,7 +6,7 @@ import (
 	//"strings"
 	"encoding/json"
 	"fmt"
-	"github.com/jie123108/glog"
+	"gobaselib/log"
 )
 
 const (
@@ -93,10 +93,10 @@ func (this *DevicesClient) Query(registration_id string) (ret string, err error)
 	ret, err = SendGet(this.BaseUrl+registration_id, make(map[string]string), this.AuthCode)
 
 	if err != nil {
-		glog.Errorf("SendGet ret:%v err:%v", ret, err)
+		log.Errorf("SendGet ret:%v err:%v", ret, err)
 		return
 	}
-	glog.Infof("query(%v) ret:%v err:%v", registration_id, ret, err)
+	log.Infof("query(%v) ret:%v err:%v", registration_id, ret, err)
 	map_ret := make(map[string]interface{})
 	err = json.Unmarshal([]byte(ret), &map_ret)
 	code, isexist := map_ret["error"]
@@ -113,17 +113,17 @@ func (this *DevicesClient) JDevicesRegister(regisinfo *DeviceRegiester, registra
 	}
 	data, err := json.Marshal(regisinfo)
 	if err != nil {
-		glog.Errorf("json.marshal(%v) failed! err:%v", regisinfo, err)
+		log.Errorf("json.marshal(%v) failed! err:%v", regisinfo, err)
 		return
 	}
 
 	for _, registration_id := range registration_ids {
 		ret, err := SendPostBytes2(this.BaseUrl+registration_id, data, this.AuthCode)
 		if err != nil {
-			glog.Errorf("1.registertags:%v registration_id:%v failed! ret:%v err:%v", data, registration_id, ret, err)
+			log.Errorf("1.registertags:%v registration_id:%v failed! ret:%v err:%v", data, registration_id, ret, err)
 		} else {
 			succ_ids = append(succ_ids, registration_id)
-			glog.Errorf("2.registertags:%v registration_id:%v failed! ret:%v err:%v", data, registration_id, ret, err)
+			log.Errorf("2.registertags:%v registration_id:%v failed! ret:%v err:%v", data, registration_id, ret, err)
 		}
 	}
 

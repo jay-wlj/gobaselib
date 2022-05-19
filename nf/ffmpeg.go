@@ -3,6 +3,7 @@ package base
 import (
 	"bytes"
 	"fmt"
+	"gobaselib/log"
 	"os"
 	"os/exec"
 	"path"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/fatih/structs"
-	"github.com/jie123108/glog"
 )
 
 // 字幕相关文档：http://ffmpeg.org/ffmpeg-filters.html#subtitles-1
@@ -123,7 +123,7 @@ var re_subtitle = regexp.MustCompile(`Stream .*: Subtitle: .*\n\s*Metadata:.*\n\
 func Atoi(str string) (i int) {
 	i, err := strconv.Atoi(str)
 	if err != nil {
-		glog.Errorf("Atoi(%s) failed! err: %v", str, err)
+		log.Errorf("Atoi(%s) failed! err: %v", str, err)
 		i = 0
 	}
 
@@ -133,7 +133,7 @@ func Atoi(str string) (i int) {
 func ParseFloat(s string) float64 {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		glog.Errorf("ParseFloat(%s) failed! err: %v", s, err)
+		log.Errorf("ParseFloat(%s) failed! err: %v", s, err)
 		f = 0.0
 	}
 	return f
@@ -157,27 +157,27 @@ func ProcDAR(dar_src string) (dar string, dar_float float32) {
 		dar = fmt.Sprintf("%d:%d", w, h)
 		dar_float = float32(w) / float32(h)
 	}
-	glog.Infof("dar_src　%s ==> %s (%.2f)", dar_src, dar, dar_float)
+	log.Infof("dar_src　%s ==> %s (%.2f)", dar_src, dar, dar_float)
 
 	return
 }
 
 func GetVideoInfo(ffmpeg_bin, video_file string) (info *VideoInfo, err error) {
-	glog.Infof("GetVideoInfo begin\n")
+	log.Infof("GetVideoInfo begin\n")
 	if !IsExist(video_file) {
-		glog.Errorf("video file [%s] not exist!", video_file)
+		log.Errorf("video file [%s] not exist!", video_file)
 		err = os.ErrNotExist
 		return
 	}
 
 	debug_str := CommandFmt(F(ffmpeg_bin), "-i", F(video_file))
-	glog.Infof("get video info: [%s]...", debug_str)
+	log.Infof("get video info: [%s]...", debug_str)
 	cmd := exec.Command(ffmpeg_bin, "-i", video_file)
 	out, err2 := cmd.CombinedOutput()
 	if err2 != nil && err2.Error() != "exit status 1" {
 		err = err2
-		glog.Errorf("get video info (%s) failed! err: [%v]", debug_str, err)
-		glog.Errorf("command output [%v]", string(out))
+		log.Errorf("get video info (%s) failed! err: [%v]", debug_str, err)
+		log.Errorf("command output [%v]", string(out))
 		return
 	}
 	outstr := string(out)
@@ -190,9 +190,9 @@ func GetVideoInfo(ffmpeg_bin, video_file string) (info *VideoInfo, err error) {
 
 	//duration 解析
 	duration_info := re_duration.FindStringSubmatch(outstr)
-	glog.Infof("duration_info:: %v", duration_info)
+	log.Infof("duration_info:: %v", duration_info)
 	if len(duration_info) != 4 {
-		glog.Errorf("matched duration_info(%v) length != 4", duration_info)
+		log.Errorf("matched duration_info(%v) length != 4", duration_info)
 		goto FORMAT_ERR
 	}
 	info = &VideoInfo{}
@@ -207,9 +207,9 @@ func GetVideoInfo(ffmpeg_bin, video_file string) (info *VideoInfo, err error) {
 	if len(video_info) == 0 {
 		video_info = re_video_rmvb.FindStringSubmatch(outstr)
 	}
-	glog.Infof("video_info:: %v", video_info)
+	log.Infof("video_info:: %v", video_info)
 	if len(video_info) != 5 && len(video_info) != 4 {
-		glog.Errorf("matched video_info(%v) length != 4|5", video_info)
+		log.Errorf("matched video_info(%v) length != 4|5", video_info)
 		goto FORMAT_ERR
 	}
 	info.VCodec = video_info[1]
@@ -223,16 +223,16 @@ func GetVideoInfo(ffmpeg_bin, video_file string) (info *VideoInfo, err error) {
 	} else {
 		info.DAR, info.DarF = ProcDAR(arr[0] + ":" + arr[1])
 	}
-	glog.Infof("info.DAR:%s, info.DarF:%v, info.Width:%d, info.Height:%d\n", info.DAR, info.DarF, info.Width, info.Height)
+	log.Infof("info.DAR:%s, info.DarF:%v, info.Width:%d, info.Height:%d\n", info.DAR, info.DarF, info.Width, info.Height)
 
 	//Audio Info 解析
 	audio_info = re_audio.FindStringSubmatch(outstr)
-	glog.Infof("audio_info:: %v", audio_info)
+	log.Infof("audio_info:: %v", audio_info)
 	if len(audio_info) != 4 {
 		audio_info = re_audio_mkv.FindStringSubmatch(outstr)
-		glog.Infof("audio_info:: %v", audio_info)
+		log.Infof("audio_info:: %v", audio_info)
 		if len(audio_info) != 3 {
-			glog.Errorf("matched audio_info(%v) length != 4", audio_info)
+			log.Errorf("matched audio_info(%v) length != 4", audio_info)
 			goto FORMAT_ERR
 		}
 
@@ -258,10 +258,10 @@ func GetVideoInfo(ffmpeg_bin, video_file string) (info *VideoInfo, err error) {
 		info.SubtitlesCnt += 1
 		info.Subtitles = append(info.Subtitles, strings.TrimSpace(subtitle_info[1]))
 	}
-	glog.Infof("GetVideoInfo end\n")
+	log.Infof("GetVideoInfo end\n")
 	return
 FORMAT_ERR:
-	glog.Errorf("get video info (%s) failed! output invalid: [%s]", debug_str, outstr)
+	log.Errorf("get video info (%s) failed! output invalid: [%s]", debug_str, outstr)
 	err = fmt.Errorf("Invalid-ffmpeg-output")
 	info = nil
 	return
@@ -315,10 +315,10 @@ type ConvertArgs struct {
 func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *ConvertArgs, timeout time.Duration) error {
 
 	if IsExist(localfile) {
-		glog.Infof("small file [%s] is exist!", localfile)
+		log.Infof("small file [%s] is exist!", localfile)
 		return nil
 	}
-	glog.Infof("Video Convert [%s] ==> [%s] timeout: %v args.OverlaySubtitle:%d, args.AudioIndex:%d, args.SubtitleFile:%s\n", video_file, localfile, timeout, args.OverlaySubtitle, args.AudioIndex, args.SubtitleFile)
+	log.Infof("Video Convert [%s] ==> [%s] timeout: %v args.OverlaySubtitle:%d, args.AudioIndex:%d, args.SubtitleFile:%s\n", video_file, localfile, timeout, args.OverlaySubtitle, args.AudioIndex, args.SubtitleFile)
 	ext := filepath.Ext(localfile)
 
 	localfile_tmp := localfile[0:len(localfile)-len(ext)] + "_tmp" + ext
@@ -326,7 +326,7 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 	dir := path.Dir(localfile_tmp)
 	err := os.MkdirAll(dir, os.ModePerm)
 	if err != nil {
-		glog.Errorf("MkdirAll(%s) failed! err: %v", dir, err)
+		log.Errorf("MkdirAll(%s) failed! err: %v", dir, err)
 		return err
 	}
 
@@ -341,13 +341,13 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 			subtitle_style_used = args.SubtitleStyle
 		}
 		vf_args = fmt.Sprintf("subtitles='%s':force_style='%s',scale=%s", args.SubtitleFile, subtitle_style_used, args.Size)
-		glog.Infof("af_args:%s\n", vf_args)
+		log.Infof("af_args:%s\n", vf_args)
 	} else if args.OverlaySubtitle >= 0 {
 		//var overlaystr string
 		//overlaystr = fmt.Sprintf("[0:v]scale=%s[scale],[scale][0:s]overlay[ov]", args.Size)
 		fc_args = fmt.Sprintf("[0:v][0:s]overlay[ov]")
 		//fc_args = fmt.Sprintf("'[0:v]scale=%s[scale],[scale][0:s]overlay[ov]'", args.Size)
-		glog.Infof("fc_args:%s\n", fc_args)
+		log.Infof("fc_args:%s\n", fc_args)
 	} else {
 		vf_args = "scale=" + args.Size
 	}
@@ -371,19 +371,19 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 		debug_str = CommandFmt(F(ffmpeg_bin), args.FFMpegArgs, "-i", F(video_file),
 			"-y", "-c:v", "libx264", "-vf", vf_args, "-map", "0:v", "-map", audio_args /*"-t", "300",*/, "-b:v", VBitRate,
 			"-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, F(localfile_tmp))
-		//glog.Infof("ffmpeg cmd: [%s]", cmd_args)
+		//log.Infof("ffmpeg cmd: [%s]", cmd_args)
 		//cmd = exec.Command(ffmpeg_bin, cmd_args...)
 	}
-	glog.Infof("ffmpeg cmd: [%s]", cmd_args)
+	log.Infof("ffmpeg cmd: [%s]", cmd_args)
 	cmd := exec.Command(ffmpeg_bin, cmd_args...)
 
-	glog.Infof("cmd_args:%s, debug_str:%s, cmd:%s\n", cmd_args, debug_str, cmd)
+	log.Infof("cmd_args:%s, debug_str:%s, cmd:%s\n", cmd_args, debug_str, cmd)
 
 	// "-ss", strconv.Itoa(begin), "-t", strconv.Itoa(duration),
 	// ./bin/linux/ffmpeg/ffmpeg -y -ss 0 -t 20 -i 偷心.mpg -c:v libx264 -vf scale=720:540 -b:v 512k -bufsize 512k -c:a aac -b:a 64k /data/VideoConvertCache/电影001/偷心512k-64k-720x540.mp4
 	// "-ss", "300", "-t", "20",
 	// -ss 300 -t 20
-	//glog.Infof("ffmpeg cmd: [%s]", debug_str)
+	//log.Infof("ffmpeg cmd: [%s]", debug_str)
 
 	// cmd := exec.Command(ffmpeg_bin, "-i", video_file, "-y", "-c:v", "libx264", "-vf", "scale="+size,
 	// 	"-b:v", VBitRate, "-bufsize", VBitRate, "-c:a", AccEncoder, "-ac", "2", "-b:a", ABitRate, localfile_tmp)
@@ -396,16 +396,16 @@ func VideoConvert(ffmpeg_bin, video_file string, localfile string, args *Convert
 		out, err = cmd.CombinedOutput()
 	}
 	if err != nil {
-		glog.Errorf("video convert(%s) failed! err: %v", debug_str, err)
-		glog.Errorf("command output [%v]", string(out))
+		log.Errorf("video convert(%s) failed! err: %v", debug_str, err)
+		log.Errorf("command output [%v]", string(out))
 		return err
 	} else {
 		err = os.Rename(localfile_tmp, localfile)
 		if err != nil {
-			glog.Errorf("Rename [%s] to [%s] failed!", localfile_tmp, localfile)
+			log.Errorf("Rename [%s] to [%s] failed!", localfile_tmp, localfile)
 			return err
 		}
-		glog.Infof("video convert src [%s] to [%s] success!", video_file, localfile)
+		log.Infof("video convert src [%s] to [%s] success!", video_file, localfile)
 	}
 	return nil
 }

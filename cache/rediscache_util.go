@@ -2,8 +2,7 @@ package cache
 
 import (
 	"fmt"
-
-	"github.com/jie123108/glog"
+	"gobaselib/log"
 	//_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
@@ -36,7 +35,7 @@ func InitRedis(vs map[string]RedisCfg) (err error) {
 			}
 			m_slaveRedis[k] = ch
 		}
-		glog.Info("InitRedis success! redis:", v.Master)
+		log.Info("InitRedis success! redis:", v.Master)
 	}
 	return
 }
@@ -78,9 +77,9 @@ func NewRedisCacheFromCfg(rediserver, password, strTimeout string, dbindex int) 
 	cfg := RedisConfig{Addr: rediserver, Password: password, DBIndex: dbindex, TimeoutStr: strTimeout}
 	redis, err = NewRedisCache(&cfg)
 	if err != nil {
-		glog.Error("init redis failed! err:", err)
+		log.Error("init redis failed! err:", err)
 		return
 	}
-	glog.Info("init redis success!")
+	log.Info("init redis success!")
 	return
 }

@@ -2,11 +2,11 @@ package base
 
 import (
 	"encoding/json"
+	"gobaselib/log"
 	"sync"
 	"time"
 
 	"github.com/jay-wlj/gobaselib/cache"
-	"github.com/jie123108/glog"
 )
 
 type QueryFunc func(value interface{}, args ...interface{}) error
@@ -24,7 +24,7 @@ func NewCacheUtil(redisconfig *cache.RedisConfig) (*CacheUtil, error) {
 	defer G_redsclient.Unlock()
 
 	if Map_rediscache == nil {
-		glog.Errorf("-----------------NewCacheUtil host:%v", redisconfig)
+		log.Errorf("-----------------NewCacheUtil host:%v", redisconfig)
 		Map_rediscache = make(map[string]*CacheUtil)
 	}
 
@@ -32,7 +32,7 @@ func NewCacheUtil(redisconfig *cache.RedisConfig) (*CacheUtil, error) {
 	if nil == value {
 		client, err := cache.NewRedisCache(redisconfig)
 		if err != nil {
-			glog.Errorf("NewRedisCache(%v) failed! err:%v", redisconfig, err)
+			log.Errorf("NewRedisCache(%v) failed! err:%v", redisconfig, err)
 			return nil, err
 		}
 		Map_rediscache[redisconfig.Addr] = new(CacheUtil)
@@ -54,7 +54,7 @@ func (this *CacheUtil) SetCache(cachename string, key string, value interface{},
 	buf, err := json.Marshal(value)
 	err = this.RedisCache.Set(key, String(buf), exptime)
 	if err != nil {
-		glog.Errorf("client.Set(%v, %v) failed! err:%v", key, value, err)
+		log.Errorf("client.Set(%v, %v) failed! err:%v", key, value, err)
 		return err
 	}
 
@@ -64,9 +64,9 @@ func (this *CacheUtil) SetCache(cachename string, key string, value interface{},
 func (this *CacheUtil) DeleteCache(cachename string, key string) error {
 	num, err := this.RedisCache.Del(key)
 	if err == nil {
-		glog.Infof("deletecache:%v %v %v succ", cachename, key, num)
+		log.Infof("deletecache:%v %v %v succ", cachename, key, num)
 	} else {
-		glog.Errorf("deletecache:%v %v failed! err:%v", cachename, key, err)
+		log.Errorf("deletecache:%v %v failed! err:%v", cachename, key, err)
 	}
 	return err
 }
@@ -80,7 +80,7 @@ func (this *CacheUtil) CacheQuery(queryfunc QueryFunc, cachename string, key str
 	if err == nil {
 		err = this.SetCache(cachename, key, value, exptime)
 		if err != nil {
-			glog.Errorf("client.SetCache(%v,%v) failed! err:%v", key, value, err)
+			log.Errorf("client.SetCache(%v,%v) failed! err:%v", key, value, err)
 		}
 	}
 	return nil

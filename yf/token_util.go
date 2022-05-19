@@ -7,8 +7,6 @@ import (
 	"time"
 
 	base "github.com/jay-wlj/gobaselib"
-
-	"github.com/jie123108/glog"
 )
 
 func TokenCheck(token string) (user_id, user_type, expire_time int64, err error) {
@@ -24,10 +22,10 @@ func token_check_server(account_server, token string, timeout time.Duration) (us
 	headers["X-YF-Token"] = token
 
 	res := base.HttpGetJson(uri, headers, timeout)
-	//glog.Infof("request [%s] status: %d", res.ReqDebug, res.StatusCode)
+	//log.Infof("request [%s] status: %d", res.ReqDebug, res.StatusCode)
 
 	if res.StatusCode != 200 {
-		glog.Debugf("request [%s] failed! err: %v", res.ReqDebug, res.Error)
+		log.Debugf("request [%s] failed! err: %v", res.ReqDebug, res.Error)
 		err = res.Error
 		if res.Error == nil {
 			err = fmt.Errorf("ERR_SERVER_ERROR")
@@ -36,7 +34,7 @@ func token_check_server(account_server, token string, timeout time.Duration) (us
 	}
 
 	if !res.Ok {
-		glog.Errorf("request [%s] failed! reason: %s", res.ReqDebug, res.Reason)
+		log.Errorf("request [%s] failed! reason: %s", res.ReqDebug, res.Reason)
 		err = fmt.Errorf(res.Reason)
 		return
 	}
@@ -46,7 +44,7 @@ func token_check_server(account_server, token string, timeout time.Duration) (us
 	jn_expire_time := res.Data["expire_time"].(json.Number)
 	user_id, err = jn_user_id.Int64()
 
-	glog.Infof("----------------tockcheck(%v, %v, %v)---------------err:%v", jn_user_id, user_id, jn_expire_time, err)
+	log.Infof("----------------tockcheck(%v, %v, %v)---------------err:%v", jn_user_id, user_id, jn_expire_time, err)
 	if err != nil {
 		return
 	}
@@ -80,17 +78,17 @@ func TokenGet(account_server string, user_id int, timeout time.Duration) (token 
 	headers["X-Not-Use-Proxy"] = "true"
 
 	res := base.HttpGet(uri, headers, timeout)
-	glog.Infof("request [%s] status: %d", res.ReqDebug, res.StatusCode)
+	log.Infof("request [%s] status: %d", res.ReqDebug, res.StatusCode)
 
 	if res.StatusCode != 200 {
-		glog.Errorf("request [%s] failed!,code:%d err: %v", res.ReqDebug, res.StatusCode, res.Error)
+		log.Errorf("request [%s] failed!,code:%d err: %v", res.ReqDebug, res.StatusCode, res.Error)
 		err = fmt.Errorf("ERR_SERVER_ERROR")
 		return
 	}
 	set := new(tokenRes)
 	err = json.Unmarshal(res.RawBody, set)
 	if err != nil {
-		glog.Errorf("unmarsh [%v],error:%s", string(res.RawBody), err.Error())
+		log.Errorf("unmarsh [%v],error:%s", string(res.RawBody), err.Error())
 		return
 	}
 	token = set.Data.Token

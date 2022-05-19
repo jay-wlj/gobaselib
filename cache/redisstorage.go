@@ -1,9 +1,8 @@
 package cache
 
 import (
+	"gobaselib/log"
 	"reflect"
-
-	"github.com/jie123108/glog"
 )
 
 type StorageConfig struct {
@@ -44,7 +43,7 @@ type ListData struct {
 func NewRedisStorage(cfg *StorageConfig, cb *StorageCallback) (storage *RedisStorage, err error) {
 	data, err := NewRedisCache(&cfg.DataCfg)
 	if err != nil {
-		glog.Errorf("NewRedisCache(%v) failed! err: %v", cfg.DataCfg, err)
+		log.Errorf("NewRedisCache(%v) failed! err: %v", cfg.DataCfg, err)
 		return nil, err
 	}
 
@@ -54,7 +53,7 @@ func NewRedisStorage(cfg *StorageConfig, cb *StorageCallback) (storage *RedisSto
 
 	index, err := NewPageCache(&cfg.IndexCfg, cfg.PageSize)
 	if err != nil {
-		glog.Errorf("NewPageCache(%v, %v) failed! err: %v", cfg.IndexCfg, cfg.PageSize, err)
+		log.Errorf("NewPageCache(%v, %v) failed! err: %v", cfg.IndexCfg, cfg.PageSize, err)
 		return nil, err
 	}
 
@@ -74,7 +73,7 @@ func (this *RedisStorage) Update(obj interface{}) (err error) {
 		var buf []byte
 		buf, err = this.cb.Marshal(obj)
 		if err != nil {
-			glog.Errorf("Marshal(%v) failed! err: %v", obj, err)
+			log.Errorf("Marshal(%v) failed! err: %v", obj, err)
 			return
 		}
 		val = string(buf)
@@ -83,7 +82,7 @@ func (this *RedisStorage) Update(obj interface{}) (err error) {
 	}
 	err = this.data.Set(key, val, 0)
 	if err != nil {
-		glog.Errorf("data.Set(%s, %v) failed! err: %v", key, obj, err)
+		log.Errorf("data.Set(%s, %v) failed! err: %v", key, obj, err)
 		return
 	}
 	return
@@ -103,13 +102,13 @@ func (this *RedisStorage) Add(obj interface{}) (err error) {
 
 	_, err = this.index.HIncrBy(indexkey, "total", 1)
 	if err != nil {
-		glog.Errorf("index.HIncrBy(%s, 'total', 1) failed! err: %v", indexkey, err)
+		log.Errorf("index.HIncrBy(%s, 'total', 1) failed! err: %v", indexkey, err)
 		return
 	}
 
 	err = this.index.Add(indexkey, id)
 	if err != nil {
-		glog.Errorf("index.Add(%s, %d) failed! err: %v", indexkey, id, err)
+		log.Errorf("index.Add(%s, %d) failed! err: %v", indexkey, id, err)
 		return
 	}
 	return
@@ -123,7 +122,7 @@ func (this *RedisStorage) Del(indexkey string, id int64) (n int64, err error) {
 	if n > 0 {
 		_, err = this.index.HIncrBy(indexkey, "total", -1)
 		if err != nil {
-			glog.Errorf("index.HIncrBy(%s, 'total', -1) failed! err: %v", indexkey, err)
+			log.Errorf("index.HIncrBy(%s, 'total', -1) failed! err: %v", indexkey, err)
 			return
 		}
 	}
@@ -136,7 +135,7 @@ func (this *RedisStorage) Del(indexkey string, id int64) (n int64, err error) {
 func (this *RedisStorage) GetTotal(indexkey string) (total int64, err error) {
 	total, err = this.index.HGetI(indexkey, "total")
 	if err != nil {
-		glog.Errorf("index.HGetI(%s, 'total') failed! err: %v", indexkey, err)
+		log.Errorf("index.HGetI(%s, 'total') failed! err: %v", indexkey, err)
 		return
 	}
 	return
@@ -161,14 +160,14 @@ func (this *RedisStorage) List(indexkey string, page int) (data ListData, err er
 	data.NextPage = -1
 	if err != nil {
 		if err.Error() != "redis: nil" {
-			glog.Errorf("index.Get(%s, %d) failed! err: %v", indexkey, page, err)
+			log.Errorf("index.Get(%s, %d) failed! err: %v", indexkey, page, err)
 		}
 		return data, err
 	}
 
 	total, err := this.GetTotal(indexkey)
 	if err != nil {
-		glog.Errorf("GetTotal(%s) failed! err: %v", indexkey, err)
+		log.Errorf("GetTotal(%s) failed! err: %v", indexkey, err)
 		return data, err
 	}
 	data.Total = total
@@ -185,18 +184,18 @@ func (this *RedisStorage) List(indexkey string, page int) (data ListData, err er
 		if err == ErrNotExist {
 			err = this.index.Del(indexkey, page, id)
 			if err != nil {
-				glog.Errorf("index.Del(%s, page:%d, id:%d) failed!", indexkey, page, id)
+				log.Errorf("index.Del(%s, page:%d, id:%d) failed!", indexkey, page, id)
 			}
 			continue
 		} else if err != nil {
 			data.Objs = nil
-			glog.Errorf("index.Del(%s, page:%d, id:%d) failed! err:%v", indexkey, page, id, err)
+			log.Errorf("index.Del(%s, page:%d, id:%d) failed! err:%v", indexkey, page, id, err)
 			return data, err
 		}
 		val := reflect.New(this.cb.Objtype).Interface()
 		err = this.cb.Unmarshal(buf, val)
 		if err != nil {
-			glog.Errorf("%s, page:%d, Unmarshal(%v), failed! err: %v", indexkey, page, buf, err)
+			log.Errorf("%s, page:%d, Unmarshal(%v), failed! err: %v", indexkey, page, buf, err)
 			return data, err
 		}
 		data.Objs[realsize] = val

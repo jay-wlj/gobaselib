@@ -11,8 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gorilla/websocket v1.4.1
-	github.com/jie123108/glog v0.0.0-20160701133742-ca74c069d4e1
+	github.com/gorilla/websocket v1.4.1	
 	github.com/jie123108/imaging v1.1.0
 	github.com/jinzhu/gorm v1.9.11
 	github.com/json-iterator/go v1.1.9

@@ -2,8 +2,8 @@ package base
 
 import (
 	"fmt"
+	"gobaselib/log"
 	"strings"
-	"github.com/jie123108/glog"
 )
 
 /**
@@ -69,16 +69,16 @@ func ConsVInfoByWidth(Width, w, h int, name string) VInfo {
 }
 
 func get_vinfo_by_dar_ex(aspect_ratio string, width, height int) []VInfo {
-	//glog.Infof("get_vinfo_by_dar_ex aspect_ratio:%s, width:%d, height:%d\n", aspect_ratio, width, height)
+	//log.Infof("get_vinfo_by_dar_ex aspect_ratio:%s, width:%d, height:%d\n", aspect_ratio, width, height)
 	allinfos, ok := RESOLUTIONS[aspect_ratio]
 	if ok {
-		glog.Infof("get_vinfo_by_dar_ex len(allinfos):%d\n", len(allinfos))
+		log.Infof("get_vinfo_by_dar_ex len(allinfos):%d\n", len(allinfos))
 		return allinfos
 	}
 
 	arr := strings.SplitN(aspect_ratio, ":", 2)
 	if len(arr) != 2 {
-		glog.Infof("get_vinfo_by_dar_ex strings.SplitN(aspect_ratio:%s, :, 2) failed\n", aspect_ratio)
+		log.Infof("get_vinfo_by_dar_ex strings.SplitN(aspect_ratio:%s, :, 2) failed\n", aspect_ratio)
 		return nil
 	}
 	w, h := Atoi(arr[0]), Atoi(arr[1])
@@ -101,7 +101,7 @@ func get_vinfo_by_dar_ex(aspect_ratio string, width, height int) []VInfo {
 		}
 	}
 	RESOLUTIONS[aspect_ratio] = infos
-	//glog.Infof("get_vinfo_by_dar_ex len(infos):%d\n", len(infos))
+	//log.Infof("get_vinfo_by_dar_ex len(infos):%d\n", len(infos))
 	return infos
 }
 
@@ -135,7 +135,7 @@ func ShowResolutions() {
 //获取当前视频，需要转码的分辨率,码率(只获取比输入视频小的分辨率)
 func GetResolutions(aspect_ratio string, width, height int) (infos []VInfo) {
 	allinfos := get_vinfo_by_dar_ex(aspect_ratio, width, height)
-	glog.Infof("GetResolutions len(allinfos):%d\n", len(allinfos))
+	log.Infof("GetResolutions len(allinfos):%d\n", len(allinfos))
 	infos = make([]VInfo, 0)
 	for _, info := range allinfos {
 		// fmt.Printf("width(%d) >= info.Width(%d) && height(%d) >= info.Height(%d): %v\n",
@@ -146,8 +146,8 @@ func GetResolutions(aspect_ratio string, width, height int) (infos []VInfo) {
 			infos = append(infos, info)
 		}
 	}
-	glog.Infof(" len(infos):%d == 0 && len(allinfos):%d\n",  len(infos), len(allinfos))
-	if len(infos) == 0 && len(allinfos) >= 1{
+	log.Infof(" len(infos):%d == 0 && len(allinfos):%d\n", len(infos), len(allinfos))
+	if len(infos) == 0 && len(allinfos) >= 1 {
 		infos = append(infos, allinfos[len(allinfos)-1])
 	}
 	return infos

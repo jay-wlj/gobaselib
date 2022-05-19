@@ -1,10 +1,10 @@
 package yf
 
 import (
+	"gobaselib/log"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jie123108/glog"
 	"gopkg.in/go-playground/validator.v9"
 )
 
@@ -26,7 +26,7 @@ func Valid(req interface{}) error {
 		case *validator.InvalidValidationError: // 参数非struct类型 不判断
 			err = nil
 		case validator.ValidationErrors:
-			glog.Error("Valid fail! err=", (err.(validator.ValidationErrors)).Error())
+			log.Error("Valid fail! err=", (err.(validator.ValidationErrors)).Error())
 			return err
 		}
 	}
@@ -52,7 +52,7 @@ func UnmarshalReq(c *gin.Context, req interface{}) bool {
 
 	if err != nil {
 		//if err := base.CheckQueryJsonField(c, &req); err != nil {
-		glog.Info("UnmarshalReq args invalid! err=", err)
+		log.Info("UnmarshalReq args invalid! err=", err)
 		JSON_FailEx(c, ERR_ARGS_INVALID, err.Error())
 		return false
 	}

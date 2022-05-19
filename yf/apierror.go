@@ -1,6 +1,6 @@
 package yf
 
-import "github.com/jie123108/glog"
+import "gobaselib/log"
 
 const (
 	ERR_ARGS_INVALID         string = "ERR_ARGS_INVALID"         // 参数错误
@@ -34,7 +34,7 @@ func GetStatusCode(reason string) int {
 	case ERR_SERVER_ERROR:
 		return 500
 	default:
-		glog.Errorf("Unknow Reason: %s", reason)
+		log.Errorf("Unknow Reason: %s", reason)
 		return 500
 	}
 }

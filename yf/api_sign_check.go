@@ -2,11 +2,11 @@ package yf
 
 import (
 	"bytes"
+	"gobaselib/log"
 	"io/ioutil"
 
 	"github.com/gin-gonic/gin"
 	base "github.com/jay-wlj/gobaselib"
-	"github.com/jie123108/glog"
 	//"strings"
 	//"encoding/json"
 )
@@ -32,10 +32,10 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 	headers := c.Request.Header
 
 	// _byte, _ := json.Marshal(headers)
-	// glog.Error(string(_byte))
+	// log.Error(string(_byte))
 	app_ids := headers["X-Yf-Appid"]
 	if len(app_ids) != 1 {
-		glog.Errorf("find %d AppId value..", len(app_ids))
+		log.Errorf("find %d AppId value..", len(app_ids))
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_ARGS_INVALID})
 		c.Abort()
 		return false
@@ -45,7 +45,7 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 
 	app_key := SignConfig.GetSignKey(app_id)
 	if app_key == "" {
-		glog.Errorf("Unknow appid [%s]", app_id)
+		log.Errorf("Unknow appid [%s]", app_id)
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_ARGS_INVALID})
 		c.Abort()
 		return false
@@ -53,13 +53,13 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 
 	req_signs := headers["X-Yf-Sign"]
 	if len(req_signs) != 1 {
-		glog.Errorf("find %d Sign value..", len(req_signs))
+		log.Errorf("find %d Sign value..", len(req_signs))
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_SIGN_ERROR})
 		c.Abort()
 		return false
 	}
 	req_sign := req_signs[0]
-	// glog.Errorf("req_sign: %s", req_sign)
+	// log.Errorf("req_sign: %s", req_sign)
 	// 测试工具使用。
 	if req_sign == SignConfig.DebugSignKey && SignConfig.Debug {
 		return true
@@ -67,11 +67,11 @@ func ApiSignCheck(c *gin.Context, body []byte) bool {
 
 	signature, SignStr := Sign(uri, args, headers, body, app_key)
 	if signature != req_sign {
-		glog.Errorf("req_sign: [%s] != calc_sign: [%s] \nSignStr [[%s]]", req_sign,
+		log.Errorf("req_sign: [%s] != calc_sign: [%s] \nSignStr [[%s]]", req_sign,
 			signature, SignStr)
-		glog.Infof("req body len: %d", len(body))
+		log.Infof("req body len: %d", len(body))
 		if SignConfig.Debug && len(body) < 100 {
-			glog.Infof("body: [[%v]]", string(body))
+			log.Infof("body: [[%v]]", string(body))
 		}
 		c.JSON(401, gin.H{"ok": false, "reason": ERR_SIGN_ERROR})
 		c.Abort()

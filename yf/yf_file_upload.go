@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"gobaselib/log"
 	"io/ioutil"
 	"math"
 	"mime/multipart"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	base "github.com/jay-wlj/gobaselib"
-	"github.com/jie123108/glog"
 )
 
 // [Content-Type] = {文件扩展名，路径前缀}
@@ -60,7 +60,7 @@ func CheckFileExist(host, filename, hash, app_id, app_key, id string) *base.OkJs
 	contentType := get_content_type(filename)
 	if contentType == "" {
 		//fmt.Println("不支持的文件类型：", filename)
-		glog.Errorf("un support file type: %s", filename)
+		log.Errorf("un support file type: %s", filename)
 		res.ReqDebug = uri
 		res.Reason = ERR_CONTENT_TYPE_INVALID
 		res.StatusCode = 400
@@ -92,7 +92,7 @@ func PostFile2YfUpload(host, filename, app_id, app_key, id, resize, target strin
 
 	contentType := get_content_type(filename)
 	if contentType == "" {
-		glog.Errorf("un support file type: %s", filename)
+		log.Errorf("un support file type: %s", filename)
 		res.Reason = ERR_CONTENT_TYPE_INVALID
 		res.StatusCode = 400
 		return res
@@ -111,7 +111,7 @@ func PostFile2YfUpload(host, filename, app_id, app_key, id, resize, target strin
 
 	bodyfile, err := os.Open(filename)
 	if err != nil {
-		glog.Errorf("Open file failed! err: %v", err)
+		log.Errorf("Open file failed! err: %v", err)
 		res.Reason = ERR_OPEN_INPUT_FILE
 		res.StatusCode = 400
 		return res
@@ -165,7 +165,7 @@ func chunk_response_parse(body map[string]interface{}) (resp *ChunkResponse, err
 	resp = &ChunkResponse{}
 	buf, err := json.Marshal(body)
 	if err != nil {
-		glog.Errorf("Marshal(%v) failed! err: %v", body, err)
+		log.Errorf("Marshal(%v) failed! err: %v", body, err)
 		return nil, err
 	}
 
@@ -182,7 +182,7 @@ func web_chunk_init(host string, headers map[string]string, timeout time.Duratio
 
 	res := base.HttpPostJson(uri, []byte(""), headers, timeout)
 	if res.StatusCode != 200 {
-		glog.Errorf("request [%s] failed! err: %v", res.ReqDebug, res.Error)
+		log.Errorf("request [%s] failed! err: %v", res.ReqDebug, res.Error)
 		var err error
 		err = res.Error
 		if err == nil {
@@ -192,13 +192,13 @@ func web_chunk_init(host string, headers map[string]string, timeout time.Duratio
 	}
 
 	if !res.Ok {
-		glog.Errorf("request [%s] failed! reason: %v", res.ReqDebug, res.Reason)
+		log.Errorf("request [%s] failed! reason: %v", res.ReqDebug, res.Reason)
 		return nil, fmt.Errorf(res.Reason)
 	}
 
 	resp, err := chunk_response_parse(res.Data)
 	if err != nil {
-		glog.Errorf("request [%s] parse response [%s] failed! err: %v", res.ReqDebug, string(res.RawBody), err)
+		log.Errorf("request [%s] parse response [%s] failed! err: %v", res.ReqDebug, string(res.RawBody), err)
 		return nil, err
 	}
 
@@ -228,14 +228,14 @@ func web_chunk_upload(host string, bodyfile *os.File, headers map[string]string,
 	part, err := writer.CreateFormFile("chunk", filepath.Base(filename))
 	if err != nil {
 		writer.Close()
-		glog.Errorf("CreateFormFile('chunk', '%s') failed! err: %v", filepath.Base(filename), err)
+		log.Errorf("CreateFormFile('chunk', '%s') failed! err: %v", filepath.Base(filename), err)
 		return nil, err
 	}
 
 	offset, chunksize_real := get_offset_and_chunksize(chunksize, chunkindex, filesize)
 	if offset >= filesize {
 		writer.Close()
-		glog.Errorf("chunksize(%d) x chunkindex(%d) : offset(%d) >= filesize(%d)", chunksize, chunkindex, offset, filesize)
+		log.Errorf("chunksize(%d) x chunkindex(%d) : offset(%d) >= filesize(%d)", chunksize, chunkindex, offset, filesize)
 		return nil, fmt.Errorf("chunk invalid")
 	}
 
@@ -243,7 +243,7 @@ func web_chunk_upload(host string, bodyfile *os.File, headers map[string]string,
 	_, err = bodyfile.ReadAt(buf, offset)
 	if err != nil {
 		writer.Close()
-		glog.Errorf("ReadAt(%s, offset: %d, len: %d) failed! err: %v", filename, offset, chunksize_real, err)
+		log.Errorf("ReadAt(%s, offset: %d, len: %d) failed! err: %v", filename, offset, chunksize_real, err)
 		return nil, err
 	}
 	chunkhash := Md5hex(buf)
@@ -258,7 +258,7 @@ func web_chunk_upload(host string, bodyfile *os.File, headers map[string]string,
 	buf = body.Bytes()
 	res := base.HttpPostJson(uri, buf, headers, timeout)
 	if res.StatusCode != 200 {
-		glog.Errorf("request [%s] failed! status: %d, err: %v", res.ReqDebug, res.StatusCode, res.Error)
+		log.Errorf("request [%s] failed! status: %d, err: %v", res.ReqDebug, res.StatusCode, res.Error)
 		err = res.Error
 		if err == nil {
 			err = fmt.Errorf("http-error: %d", res.StatusCode)
@@ -267,13 +267,13 @@ func web_chunk_upload(host string, bodyfile *os.File, headers map[string]string,
 	}
 
 	if !res.Ok {
-		glog.Errorf("request [%s] failed! reason: %v", res.ReqDebug, res.Reason)
+		log.Errorf("request [%s] failed! reason: %v", res.ReqDebug, res.Reason)
 		return nil, fmt.Errorf(res.Reason)
 	}
 
 	resp, err := chunk_response_parse(res.Data)
 	if err != nil {
-		glog.Errorf("request [%s] parse response [%s] failed! err: %v", res.ReqDebug, string(res.RawBody), err)
+		log.Errorf("request [%s] parse response [%s] failed! err: %v", res.ReqDebug, string(res.RawBody), err)
 		return nil, err
 	}
 	return resp, nil
@@ -283,7 +283,7 @@ func YfChunkUploadWeb(host, filename, app_id, id, token string, timeout time.Dur
 	// hash, filesize, err := Md5File(filename)
 	hash, filesize, err := NFSimpleMd5File(filename)
 	if err != nil {
-		glog.Errorf("Md5File(%s) failed! err: %v", filename, err)
+		log.Errorf("Md5File(%s) failed! err: %v", filename, err)
 		return nil, err
 	}
 
@@ -310,7 +310,7 @@ func YfChunkUploadWeb(host, filename, app_id, id, token string, timeout time.Dur
 
 	resp, err := web_chunk_init(host, headers, timeout)
 	if err != nil {
-		glog.Errorf("web_chunk_init(headers:%v) failed! err: %v", headers, err)
+		log.Errorf("web_chunk_init(headers:%v) failed! err: %v", headers, err)
 		return nil, err
 	}
 	if len(resp.NotCompletedChunks) == 0 && resp.Url != "" {
@@ -323,7 +323,7 @@ func YfChunkUploadWeb(host, filename, app_id, id, token string, timeout time.Dur
 
 	bodyfile, err := os.Open(filename)
 	if err != nil {
-		glog.Errorf("Open file failed! err:%v", err)
+		log.Errorf("Open file failed! err:%v", err)
 		return nil, err
 	}
 	defer bodyfile.Close()
@@ -336,7 +336,7 @@ func YfChunkUploadWeb(host, filename, app_id, id, token string, timeout time.Dur
 		for _, chunkindex := range NotCompletedChunks {
 			chunk_resp, chunk_err = web_chunk_upload(host, bodyfile, headers, filesize, chunksize, chunkindex, timeout)
 			if chunk_err != nil {
-				glog.Errorf("web_chunk_upload(headers: %v) failed! err: %v", headers, chunk_err)
+				log.Errorf("web_chunk_upload(headers: %v) failed! err: %v", headers, chunk_err)
 				//TODO: 出错重试。
 				return nil, chunk_err
 			}

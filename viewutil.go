@@ -4,12 +4,12 @@ import (
 	//"encoding/json"
 	"bytes"
 	"fmt"
+	"gobaselib/log"
 	"io/ioutil"
 	"reflect"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jie123108/glog"
 
 	jsoniter "github.com/json-iterator/go"
 	//"unsafe"
@@ -132,16 +132,16 @@ func CheckQueryJsonField(c *gin.Context, stu interface{}) error {
 	buf, err := GetPostJsonData(c)
 
 	if err == nil {
-		glog.Infof("uri:%v buf:%v", GetUri(c), string(buf))
+		log.Infof("uri:%v buf:%v", GetUri(c), string(buf))
 		//err = json.Unmarshal(buf, stu)
 		err = jsoniter.Unmarshal(buf, stu)
 		if err != nil {
 			post_form := c.Request.PostForm
 			form := c.Request.Form
-			glog.Errorf("1. try Invalid body[%v] postform[%v] form[%v], err: %v", string(buf), post_form, form, err)
+			log.Errorf("1. try Invalid body[%v] postform[%v] form[%v], err: %v", string(buf), post_form, form, err)
 		}
 	} else {
-		glog.Errorf("2. try  Invalid body[%v] err: %v", string(buf), err)
+		log.Errorf("2. try  Invalid body[%v] err: %v", string(buf), err)
 	}
 
 	return err
@@ -151,7 +151,7 @@ func CheckQueryJsonField(c *gin.Context, stu interface{}) error {
 func CheckNilField(info interface{}, fields []string) (ret bool) {
 	defer func() {
 		if err := recover(); err != nil {
-			glog.Errorf("%v", err)
+			log.Errorf("%v", err)
 			ret = true
 		}
 	}()
@@ -162,7 +162,7 @@ func CheckNilField(info interface{}, fields []string) (ret bool) {
 	for _, k := range fields {
 		one := v.FieldByName(k)
 		if !one.IsValid() || one.Interface() == reflect.Zero(one.Type()).Interface() {
-			glog.Errorf("field %s is nil", k)
+			log.Errorf("field %s is nil", k)
 			return false
 		}
 	}

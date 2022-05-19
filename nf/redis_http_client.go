@@ -3,11 +3,10 @@ package base
 import (
 	// "fmt"
 	"encoding/json"
+	"gobaselib/log"
 	"time"
 
 	"github.com/jay-wlj/gobaselib/cache"
-
-	"github.com/jie123108/glog"
 )
 
 type RedisHttpClient struct {
@@ -82,7 +81,7 @@ func (this *RedisHttpClient) HttpGetJson(uri string, headers map[string]string,
 		str = string(bt)
 		err = this.cache.Set(key, str, this.redis_cfg.Timeout)
 		if err != nil {
-			glog.Errorf("cache.Set('%s', '%v', '%v') failed! err:%v", key, data, this.redis_cfg.Timeout, err)
+			log.Errorf("cache.Set('%s', '%v', '%v') failed! err:%v", key, data, this.redis_cfg.Timeout, err)
 		}
 	} else {
 		if res_cached.StatusCode > 0 {

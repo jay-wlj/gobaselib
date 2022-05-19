@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gobaselib/log"
 	"time"
 
-	"github.com/jie123108/glog"
 	nsq "github.com/nsqio/go-nsq"
 )
 
@@ -23,7 +23,7 @@ func NewNsq(mqurls []string) (r *Nsq) {
 		mps[v] = initProducer(v)
 	}
 	r = &Nsq{mps}
-	glog.Error("mqurls:", r.mps, " mqurls:", mqurls)
+	log.Error("mqurls:", r.mps, " mqurls:", mqurls)
 	return
 }
 
@@ -60,11 +60,11 @@ func (m *Nsq) DeferedPublishMsg(v NsqMsg, delay time.Duration) error {
 	for k, val := range m.mps {
 		err = val.DeferredPublishAsync(v.Topic(), delay, body, nil)
 		if err != nil {
-			glog.Errorf("publih fail! err=%v, url:%v", err, k)
+			log.Errorf("publih fail! err=%v, url:%v", err, k)
 			continue
 		}
 	}
-	//glog.Error("all nsqd publih fail! topic:", v.Topic(), " body:", string(body))
+	//log.Error("all nsqd publih fail! topic:", v.Topic(), " body:", string(body))
 
 	return err
 }
@@ -73,12 +73,12 @@ func (m *Nsq) asyncPublishMsg(topic string, body []byte) (err error) {
 	for k, v := range m.mps {
 		err = publish(v, topic, string(body))
 		if err != nil {
-			glog.Errorf("publih fail! err=%v, url:%v", err, k)
+			log.Errorf("publih fail! err=%v, url:%v", err, k)
 			continue
 		}
 		return
 	}
-	glog.Error("all nsqd publih fail! topic:", topic, " body:", string(body))
+	log.Error("all nsqd publih fail! topic:", topic, " body:", string(body))
 
 	return
 }
@@ -86,10 +86,10 @@ func (m *Nsq) asyncPublishMsg(topic string, body []byte) (err error) {
 // 初始化生产者
 func initProducer(str string) (producer *nsq.Producer) {
 	var err error
-	glog.Info("address: ", str)
+	log.Info("address: ", str)
 	producer, err = nsq.NewProducer(str, nsq.NewConfig())
 	if err != nil {
-		glog.Error("initProducer fail! err=", err)
+		log.Error("initProducer fail! err=", err)
 		panic(err)
 	}
 	return

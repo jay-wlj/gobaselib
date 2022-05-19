@@ -6,7 +6,6 @@ import (
 	"sync/atomic"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jie123108/glog"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -30,11 +29,11 @@ type PsqlDB struct {
 func (v *PsqlDB) ListPage(page, page_size int) *gorm.DB {
 	if page <= 0 {
 		page = 1
-		glog.Error("ListPage page:", page, " <= 0")
+		log.Error("ListPage page:", page, " <= 0")
 	}
 	if page_size <= 0 {
 		page_size = 10
-		glog.Error("ListPage page_size:", page_size, " <= 0")
+		log.Error("ListPage page_size:", page_size, " <= 0")
 	}
 	return v.Limit(page_size).Offset((page - 1) * page_size)
 }
@@ -44,7 +43,7 @@ func (v *PsqlDB) Begin() *PsqlDB {
 		v.DB = v.DB.Begin()
 		return v
 	} else {
-		glog.Debug("PsqlDB is trasactions, ignore this time")
+		log.Debug("PsqlDB is trasactions, ignore this time")
 	}
 	return nil
 }
@@ -58,7 +57,7 @@ func (v *PsqlDB) Commit() *PsqlDB {
 			}
 		}
 	} else {
-		glog.Debug("PsqlDB is commited! ignore this time")
+		log.Debug("PsqlDB is commited! ignore this time")
 	}
 	return v
 }
@@ -67,7 +66,7 @@ func (v *PsqlDB) Rollback() *PsqlDB {
 	if atomic.CompareAndSwapInt32(&v.tx_flag, 1, 0) {
 		v.DB = v.DB.Rollback()
 	} else {
-		glog.Debug("PsqlDB is rollbacked! ignore this time")
+		log.Debug("PsqlDB is rollbacked! ignore this time")
 	}
 	return v
 }
@@ -89,11 +88,11 @@ func InitPsqlDb(psqlUrl string, debug bool) (*gorm.DB, error) {
 
 	db, err := gorm.Open("postgres", psqlUrl)
 	if err != nil {
-		glog.Fatalf("open postgresql(%v) failed! err: %v", psqlUrl, err)
+		log.Fatalf("open postgresql(%v) failed! err: %v", psqlUrl, err)
 		panic("open postgresql fail!")
 	}
 	fmt.Println("open sql ok")
-	glog.Infof("open psql(%s) ok!", psqlUrl)
+	log.Infof("open psql(%s) ok!", psqlUrl)
 
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxOpenConns(100)
@@ -116,11 +115,11 @@ func InitMysqlDb(mysqlUrl string, debug bool) (*gorm.DB, error) {
 
 	db, err := gorm.Open("mysql", mysqlUrl)
 	if err != nil {
-		glog.Fatalf("open mysql(%v) failed! err: %v", mysqlUrl, err)
+		log.Fatalf("open mysql(%v) failed! err: %v", mysqlUrl, err)
 		panic("open mysql fail!")
 	}
 	fmt.Println("open sql ok")
-	glog.Infof("open mysql(%s) ok!", mysqlUrl)
+	log.Infof("open mysql(%s) ok!", mysqlUrl)
 
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxOpenConns(100)

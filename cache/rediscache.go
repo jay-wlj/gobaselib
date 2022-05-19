@@ -3,12 +3,12 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"gobaselib/log"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/jie123108/glog"
 	redis "gopkg.in/redis.v5"
 )
 
@@ -48,7 +48,7 @@ func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 
 	if cfg.Timeout == 0 && cfg.TimeoutStr != "" {
 		if cfg.Timeout, err = time.ParseDuration(cfg.TimeoutStr); err != nil {
-			glog.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! timeout:", cfg.Timeout, " err:", err)
+			log.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! timeout:", cfg.Timeout, " err:", err)
 			cache = nil
 			return
 		}
@@ -58,7 +58,7 @@ func NewRedisCache(cfg *RedisConfig) (cache *RedisCache, err error) {
 	var pong string
 	pong, err = cache.Client.Ping().Result()
 	if err != nil {
-		glog.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! pong:", pong, " err:", err)
+		log.Error("NewRedisCache(", cfg.Addr, ",", cfg.DBIndex, ") failed! pong:", pong, " err:", err)
 		cache = nil
 		return
 	}
@@ -137,7 +137,7 @@ func (this *RedisCache) HSet(key, field string, value interface{}, exptime time.
 	if err == nil && exptime > 0 {
 		err = this.Client.Expire(key, exptime).Err()
 		if err != nil {
-			glog.Error("redis.Expire(", key, ", ", exptime, ") failed! err:", err)
+			log.Error("redis.Expire(", key, ", ", exptime, ") failed! err:", err)
 			err = nil
 		}
 	}

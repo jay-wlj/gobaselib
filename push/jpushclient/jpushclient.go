@@ -3,9 +3,9 @@ package jpushclient
 import (
 	"encoding/json"
 	"fmt"
-	base "github.com/jay-wlj/gobaselib"
+	"gobaselib/log"
 
-	"github.com/jie123108/glog"
+	base "github.com/jay-wlj/gobaselib"
 )
 
 func NewAudience(user_ids []int64, ext_tags []string, ext_tags_and []string) (audience Audience, audience_old Audience) {
@@ -50,19 +50,19 @@ func NewAudience(user_ids []int64, ext_tags []string, ext_tags_and []string) (au
 func PushSendMsg(pusher *PushClient, bytes []byte) (msg_id string, err error) {
 	retstr, err := pusher.Send(bytes)
 	if err != nil {
-		glog.Errorf("pusher.Send failed!  err:%v", err)
+		log.Errorf("pusher.Send failed!  err:%v", err)
 		return
 	}
-	glog.Infof("retstr:%v", retstr)
+	log.Infof("retstr:%v", retstr)
 	map_ret := make(map[string]interface{})
 	err = json.Unmarshal(base.Slice(retstr), &map_ret)
 	if err != nil {
-		glog.Errorf("json.Unmarshal failed!  err:%v retstr:%v", err, retstr)
+		log.Errorf("json.Unmarshal failed!  err:%v retstr:%v", err, retstr)
 		return
 	}
 	msg_id, isexist := map_ret["msg_id"].(string)
 	if !isexist {
-		glog.Errorf("map_ret[msg_id] not exists err:%v", retstr)
+		log.Errorf("map_ret[msg_id] not exists err:%v", retstr)
 		err = fmt.Errorf("pushsendmsg failed! err:%v", retstr)
 	}
 	return
@@ -71,19 +71,19 @@ func PushSendMsg(pusher *PushClient, bytes []byte) (msg_id string, err error) {
 func PushSendSchedule(schedule *ScheduleClient, bytes []byte) (schedule_id string, err error) {
 	retstr, err := schedule.Send(bytes)
 	if err != nil {
-		glog.Errorf("pusher.Send failed!  err:%v", err)
+		log.Errorf("pusher.Send failed!  err:%v", err)
 		return
 	}
-	glog.Infof("retstr:%v", retstr)
+	log.Infof("retstr:%v", retstr)
 	map_ret := make(map[string]interface{})
 	err = json.Unmarshal(base.Slice(retstr), &map_ret)
 	if err != nil {
-		glog.Errorf("json.Unmarshal failed!  err:%v retstr:%v", err, retstr)
+		log.Errorf("json.Unmarshal failed!  err:%v retstr:%v", err, retstr)
 		return
 	}
 	schedule_id, isexist := map_ret["schedule_id"].(string)
 	if !isexist {
-		glog.Errorf("map_ret[schedule_id] not exists,retstr:%v", retstr)
+		log.Errorf("map_ret[schedule_id] not exists,retstr:%v", retstr)
 		err = fmt.Errorf("sendschedule failed! err:%v", retstr)
 	}
 	return
@@ -96,10 +96,10 @@ func JPushBind(secret string, appkey string, tag string, reg_id string) error {
 	jclient := NewDevicesClient(secret, appkey)
 	succ_ids, err := jclient.JDevicesRegister(&reginfo, []string{reg_id})
 	if err != nil {
-		glog.Errorf("jclient.JDevicesRegister(%v,%v) failed! err:%v", reg_id, tag, err)
+		log.Errorf("jclient.JDevicesRegister(%v,%v) failed! err:%v", reg_id, tag, err)
 		return err
 	}
-	glog.Errorf("regisinfo:%v succ_ids:%v", reginfo, succ_ids)
+	log.Errorf("regisinfo:%v succ_ids:%v", reginfo, succ_ids)
 	if len(succ_ids) > 0 && succ_ids[0] == reg_id {
 		return nil
 	}
@@ -113,10 +113,10 @@ func JPushUnBind(secret string, appkey string, tag string, reg_id string) error 
 	jclient := NewDevicesClient(secret, appkey)
 	succ_ids, err := jclient.JDevicesRegister(&reginfo, []string{reg_id})
 	if err != nil {
-		glog.Errorf("jclient.JDevicesRegister(%v) failed! err:%v", reginfo, err)
+		log.Errorf("jclient.JDevicesRegister(%v) failed! err:%v", reginfo, err)
 		return err
 	}
-	glog.Errorf("regisinfo:%v succ_ids:%v", reginfo, succ_ids)
+	log.Errorf("regisinfo:%v succ_ids:%v", reginfo, succ_ids)
 	if len(succ_ids) > 0 && succ_ids[0] == reg_id {
 		return nil
 	}
@@ -155,7 +155,7 @@ func JPushUserNotice(
 
 	bytes, err := payload.ToBytes()
 	if err != nil {
-		glog.Errorf("payload.ToBytes failed! err:%v", err)
+		log.Errorf("payload.ToBytes failed! err:%v", err)
 		return
 	}
 
@@ -169,12 +169,12 @@ func JPushUserNotice(
 		payload.SetAudience(&audience_old)
 		bytes_old, err_old := payload.ToBytes()
 		if err_old != nil {
-			glog.Errorf("old payload.ToBytes failed! err:%v", err_old)
+			log.Errorf("old payload.ToBytes failed! err:%v", err_old)
 			return
 		}
 
 		msg_id_old, err_old := PushSendMsg(pusher, bytes_old)
-		glog.Infof("send old msg msg_Id:%v err:%v", msg_id_old, err_old)
+		log.Infof("send old msg msg_Id:%v err:%v", msg_id_old, err_old)
 	}
 	return
 }
@@ -229,7 +229,7 @@ func JPushNotice(
 
 	bytes, err := payload.ToBytes()
 	if err != nil {
-		glog.Errorf("payload.ToBytes failed! err:%v", err)
+		log.Errorf("payload.ToBytes failed! err:%v", err)
 		return
 	}
 
@@ -299,12 +299,12 @@ func JPushScheduleNotice(
 
 	bytes, err := schedulepayload.ToBytes()
 	if err != nil {
-		glog.Errorf("schedulepayload.ToBytes failed! err:%v", err)
+		log.Errorf("schedulepayload.ToBytes failed! err:%v", err)
 		return
 	}
 	schedule_id, err = PushSendSchedule(schedule, bytes)
 	if err != nil {
-		glog.Errorf("PushSendSchedule failed! err:%v", err)
+		log.Errorf("PushSendSchedule failed! err:%v", err)
 	}
 
 	if len(user_ids) > 0 {
@@ -314,15 +314,15 @@ func JPushScheduleNotice(
 
 		bytes_old, err_old := schedulepayload.ToBytes()
 		if err_old != nil {
-			glog.Errorf("schedulepayload.ToBytes failed! err:%v", err_old)
+			log.Errorf("schedulepayload.ToBytes failed! err:%v", err_old)
 			return
 		}
 
 		schedule_id_old, err_old := PushSendSchedule(schedule, bytes_old)
 		if err_old != nil {
-			glog.Errorf("old PushSendSchedule failed! err:%v", err_old)
+			log.Errorf("old PushSendSchedule failed! err:%v", err_old)
 		} else {
-			glog.Infof("old schedepayload schedule_id:%v err:%v", schedule_id_old, err_old)
+			log.Infof("old schedepayload schedule_id:%v err:%v", schedule_id_old, err_old)
 		}
 	}
 

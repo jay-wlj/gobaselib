@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gobaselib/log"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -14,8 +15,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/jie123108/glog"
 )
 
 func init() {
@@ -51,7 +50,7 @@ func (res *OkJson) okJsonParse() *OkJson {
 	decoder.UseNumber()
 	err := decoder.Decode(&res)
 	if err != nil {
-		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
+		log.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
 		res.Error = err
 		res.Reason = ERR_SERVER_ERROR
 		res.StatusCode = 500
@@ -227,7 +226,7 @@ func http_req(method, uri string, body []byte, args map[string]string, headers m
 func FormatHttpRequest(method, uri string, args, headers map[string]string, body []byte) (req *http.Request, err error, reason string) {
 	req, err = http.NewRequest(method, uri, bytes.NewReader(body))
 	if err != nil {
-		glog.Errorf("NewRequest(method:%s, uri: '%s') failed! err: %v", method, uri, err)
+		log.Errorf("NewRequest(method:%s, uri: '%s') failed! err: %v", method, uri, err)
 		return nil, err, ""
 	}
 	for key, value := range headers {
@@ -250,7 +249,7 @@ func write_debug(begin time.Time, res *Resp, body_len *int) {
 	if seconds > 0 && *body_len > 0 {
 		kbps = float64(*body_len) / float64(1024) / seconds
 	}
-	glog.Infof("REQUEST [ %s ] status: %d, body_len: %d, cost: %v, speed: %.3f kb/s", res.ReqDebug, res.StatusCode, *body_len, cost, kbps)
+	log.Infof("REQUEST [ %s ] status: %d, body_len: %d, cost: %v, speed: %.3f kb/s", res.ReqDebug, res.StatusCode, *body_len, cost, kbps)
 }
 
 func write_debug_ok_json(begin time.Time, res *OkJson, body_len *int) {
@@ -260,7 +259,7 @@ func write_debug_ok_json(begin time.Time, res *OkJson, body_len *int) {
 	if seconds > 0 && *body_len > 0 {
 		kbps = float64(*body_len) / float64(1024) / seconds
 	}
-	glog.Infof("REQUEST [ %s ] status: %d, body_len: %d, cost: %v, speed: %.3f kb/s", res.ReqDebug, res.StatusCode, *body_len, cost, kbps)
+	log.Infof("REQUEST [ %s ] status: %d, body_len: %d, cost: %v, speed: %.3f kb/s", res.ReqDebug, res.StatusCode, *body_len, cost, kbps)
 }
 
 func httpReqInternal(method, uri string, body []byte, args map[string]string, headers map[string]string, timeout time.Duration) *Resp {
@@ -275,7 +274,7 @@ func httpReqInternal(method, uri string, body []byte, args map[string]string, he
 	}
 	defer write_debug(begin, res, &body_len)
 	if err != nil {
-		glog.Errorf("###### err: %v", err)
+		log.Errorf("###### err: %v", err)
 		res.Error = err
 		res.StatusCode = 500
 		return res
@@ -287,7 +286,7 @@ func httpReqInternal(method, uri string, body []byte, args map[string]string, he
 		body_len = len(data)
 	}
 	if err != nil {
-		glog.Errorf("REQUEST [ %s ] Read Body Failed! err: %v", req_debug, err)
+		log.Errorf("REQUEST [ %s ] Read Body Failed! err: %v", req_debug, err)
 		res.StatusCode = 500
 		res.Error = err
 		return res
@@ -300,13 +299,13 @@ func httpReqInternal(method, uri string, body []byte, args map[string]string, he
 		content_length, _ = strconv.Atoi(strContentLengths[0])
 		if content_length > 0 && len(data) != content_length {
 			res.StatusCode = 500
-			glog.Errorf("REQUEST [ %s ] Content-Length: %d, len(body): %d", res.ReqDebug, content_length, len(data))
+			log.Errorf("REQUEST [ %s ] Content-Length: %d, len(body): %d", res.ReqDebug, content_length, len(data))
 			res.Error = fmt.Errorf("Length of Body is Invalid")
 			return res
 		}
 	}
 	if err != nil {
-		glog.Errorf("REQUEST [ %s ] Read Body Failed! body-len: %d err: %v", req_debug, content_length, err)
+		log.Errorf("REQUEST [ %s ] Read Body Failed! body-len: %d err: %v", req_debug, content_length, err)
 		res.StatusCode = 500
 		res.Error = err
 		return res
@@ -355,7 +354,7 @@ func HttpGetJsonRes(uri string, headers map[string]string, timeout time.Duration
 	decoder.UseNumber()
 	err := decoder.Decode(v)
 	if err != nil {
-		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
+		log.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
 		return res, err
 	}
 
@@ -373,7 +372,7 @@ func HttpPostJsonRes(uri string, body []byte, headers map[string]string, timeout
 	decoder.UseNumber()
 	err := decoder.Decode(v)
 	if err != nil {
-		glog.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
+		log.Errorf("Invalid json [%s] err: %v", string(res.RawBody), err)
 		return res, err
 	}
 

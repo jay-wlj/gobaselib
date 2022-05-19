@@ -2,12 +2,12 @@ package base
 
 import (
 	"fmt"
+	"gobaselib/log"
 	"io/ioutil"
 	"path/filepath"
 
 	jsoniter "github.com/json-iterator/go"
 
-	"github.com/jie123108/glog"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -23,13 +23,13 @@ func LoadConf(file string, pObj interface{}) (err error) {
 	}
 	var data []byte
 	if data, err = ioutil.ReadFile(file); err != nil {
-		glog.Error("配置文件读取错误! err=", err)
+		log.Error("配置文件读取错误! err=", err)
 		return
 	}
 
 	//把yaml文件解析成struct类型
 	if err = yaml.Unmarshal(data, pObj); err != nil {
-		glog.Error("配置信息读取失败!", err)
+		log.Error("配置信息读取失败!", err)
 		return err
 	}
 
@@ -43,30 +43,30 @@ func LoadConf(file string, pObj interface{}) (err error) {
 					v = dir + v                    // 相对于配置文件的路径
 				}
 				if data, err = ioutil.ReadFile(v); err != nil {
-					glog.Error("LoadConfig fail! path=", v, " err=", err)
+					log.Error("LoadConfig fail! path=", v, " err=", err)
 					return err
 				}
 				if err = yaml.Unmarshal(data, pObj); err != nil {
-					glog.Error("LoadConfig fail! path=", v, " err=", err)
+					log.Error("LoadConfig fail! path=", v, " err=", err)
 					return err
 				}
 			}
 
 			// 覆盖父亲节点的一些配置
 			if data, err = ioutil.ReadFile(file); err != nil {
-				glog.Error("配置文件读取错误! err=", err)
+				log.Error("配置文件读取错误! err=", err)
 				return
 			}
 			err = yaml.Unmarshal(data, pObj)
 			if err != nil {
-				glog.Error("配置信息读取失败!", err)
+				log.Error("配置信息读取失败!", err)
 				return err
 			}
 		}
 	}
 
 	if data, err = jsoniter.MarshalIndent(pObj, "", "  "); err != nil {
-		glog.Error("配置信息读取失败!", err)
+		log.Error("配置信息读取失败!", err)
 		return
 	}
 	fmt.Println("--------load conf-------\r\n", string(data))

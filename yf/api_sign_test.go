@@ -2,10 +2,9 @@ package yf
 
 import (
 	"fmt"
+	"gobaselib/log"
 	"strings"
 	"testing"
-
-	"github.com/jie123108/glog"
 )
 
 func parse_headers(str_headers string) map[string][]string {
@@ -17,7 +16,7 @@ func parse_headers(str_headers string) map[string][]string {
 		}
 		idx := strings.Index(head, ":")
 		if idx == -1 {
-			glog.Errorf("Invalid Head: %s", head)
+			log.Errorf("Invalid Head: %s", head)
 		} else {
 			key := strings.ToLower(strings.TrimSpace(head[0:idx]))
 			value := strings.TrimSpace(head[idx+1:])
@@ -39,7 +38,7 @@ func parse_args(str_args string) map[string][]string {
 		} else if len(arr) == 1 {
 			key = arr[0]
 		} else {
-			glog.Errorf("---- invalid arg: %s", arg)
+			log.Errorf("---- invalid arg: %s", arg)
 		}
 		args[key] = append(args[key], value)
 	}

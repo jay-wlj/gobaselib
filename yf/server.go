@@ -3,6 +3,7 @@ package yf
 import (
 	"context"
 	"fmt"
+	"gobaselib/log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jay-wlj/gobaselib/db"
-	"github.com/jie123108/glog"
 )
 
 const (
@@ -175,7 +175,7 @@ func (t *Server) handlerwrap(c *gin.Context) {
 		if tx {
 			err := sqldb.Commit().Error
 			if err != nil {
-				glog.Errorf("commit err! %v", err)
+				log.Errorf("commit err! %v", err)
 			}
 		} else {
 			sqldb.Rollback()

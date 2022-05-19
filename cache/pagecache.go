@@ -1,9 +1,10 @@
 package cache
 
 import (
+	"gobaselib/log"
 	"strconv"
 	// "encoding/json"
-	"github.com/jie123108/glog"
+
 	"github.com/vmihailenco/msgpack"
 )
 
@@ -170,7 +171,7 @@ var SCRIPT_DEL_PAGE = ` -- line 0
 `
 
 func (this *PageCache) DelPage(key string, page int) (err error) {
-	glog.Infof("del page key:%s, page: %d", key, page)
+	log.Infof("del page key:%s, page: %d", key, page)
 	keys := []string{key}
 	_, err = this.Cache.Eval(SCRIPT_DEL_PAGE, keys, page)
 	return err
@@ -218,7 +219,7 @@ var SCRIPT_DEL = `
 func (this *PageCache) Del(key string, page int, value int64) (err error) {
 	keys := []string{key}
 	n, err := this.Cache.Eval(SCRIPT_DEL, keys, page, value)
-	// glog.Errorf("cache.Del(%s,%d,%d) n: %d", key, page, value, n)
+	// log.Errorf("cache.Del(%s,%d,%d) n: %d", key, page, value, n)
 	if n == 2 {
 		return this.DelPage(key, page)
 	}
@@ -232,7 +233,7 @@ func (this *PageCache) get_last_page(key string) (cur_page int, err error) {
 	s_cur_page, err := this.Cache.HGet(key, "cur_page")
 	if err != nil {
 		if err.Error() != "redis: nil" {
-			glog.Errorf("cache:hget(%s,'cur_page') failed! err: [%v]", key, err)
+			log.Errorf("cache:hget(%s,'cur_page') failed! err: [%v]", key, err)
 		}
 		return
 	}
@@ -258,7 +259,7 @@ func (this *PageCache) Get(key string, page int) (pageDetail *PageDetail, err er
 	pagekey := strconv.Itoa(page)
 	str, err := this.Cache.HGetB(key, pagekey)
 	if err != nil {
-		//glog.Errorf("cache:hget(%s, %s) failed! err: %v", key, pagekey, err)
+		//log.Errorf("cache:hget(%s, %s) failed! err: %v", key, pagekey, err)
 		return nil, err
 	}
 
@@ -270,7 +271,7 @@ func (this *PageCache) Get(key string, page int) (pageDetail *PageDetail, err er
 	pageDetail = &PageDetail{}
 	err = msgpack.Unmarshal(str, pageDetail)
 	if err != nil {
-		glog.Errorf("hget(%s,%s): msgpack.Unmarshal(%v) failed! err: %v", key, pagekey, str, err)
+		log.Errorf("hget(%s,%s): msgpack.Unmarshal(%v) failed! err: %v", key, pagekey, str, err)
 		return nil, err
 	}
 	pageDetail.CurPage = page

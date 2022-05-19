@@ -2,11 +2,10 @@ package base
 
 import (
 	"fmt"
+	"gobaselib/log"
 	"testing"
 
 	"github.com/jay-wlj/gobaselib/cache"
-
-	"github.com/jie123108/glog"
 )
 
 type Conf struct {
@@ -23,7 +22,7 @@ func TestLoadConf(t *testing.T) {
 	var v Conf
 
 	if err := LoadConf("E:\\Project\\go\\src\\yunbay\\ybgoods\\conf\\config.yml", &v); err != nil {
-		glog.Error("配置文件读取错误! err=", err)
+		log.Error("配置文件读取错误! err=", err)
 		return
 	}
 

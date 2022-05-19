@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crypto/md5"
 	"fmt"
+	"gobaselib/log"
 	"io"
 	"math"
 	"os"
@@ -12,8 +13,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/jie123108/glog"
 )
 
 func GetAppPath() string {
@@ -152,7 +151,7 @@ func ListFilesEx(inputDir string, exts map[string]bool, grep string) ([]string, 
 					}
 				}
 			} else {
-				//glog.Errorf("unproc file: %s ext: %s\n", path, ext)
+				//log.Errorf("unproc file: %s ext: %s\n", path, ext)
 			}
 		}
 		return nil
@@ -170,14 +169,14 @@ func ListDirName(inputDir, grep string) ([]string, error) {
 		return fileList, nil
 	}
 
-	glog.Infof("ListDir inputDir:%s, grep:%s\n", inputDir, grep)
+	log.Infof("ListDir inputDir:%s, grep:%s\n", inputDir, grep)
 	err := filepath.Walk(inputDir, func(path string, f os.FileInfo, err error) error {
-		//glog.Infof("ListDir path:%s\n", path)
+		//log.Infof("ListDir path:%s\n", path)
 		if f.IsDir() {
 			//offset := strings.LastIndex(path, "\\")
 			//if offset >= 0 {
 			dirname := path
-			glog.Infof("ListDir path:%s, dirname:%s\n", path, dirname)
+			log.Infof("ListDir path:%s, dirname:%s\n", path, dirname)
 			if dirname != "" {
 				if grep == "" { //正则表达式匹配条件，为空，不需要条件匹配
 					fileList = append(fileList, path)
@@ -188,7 +187,7 @@ func ListDirName(inputDir, grep string) ([]string, error) {
 					}
 				}
 			} else {
-				//glog.Errorf("unproc file: %s ext: %s\n", path, ext)
+				//log.Errorf("unproc file: %s ext: %s\n", path, ext)
 			}
 		}
 

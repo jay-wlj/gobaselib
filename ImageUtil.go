@@ -3,8 +3,7 @@ package base
 import (
 	"bufio"
 	"bytes"
-
-	"github.com/jie123108/glog"
+	"gobaselib/log"
 
 	// "fmt"
 	"image"
@@ -93,7 +92,7 @@ func ResizeImgToBytes(srcImg image.Image, filename string, width, height int, en
 	//err = imaging.Encode(buf_writer, new_img, imaging.JPEG, quality)
 	err = imaging.Encode(buf_writer, new_img, imaging.JPEG)
 	if err != nil {
-		glog.Errorf("imaging.Encode(src: %s, width: %d, height: %d) failed! err: %v",
+		log.Errorf("imaging.Encode(src: %s, width: %d, height: %d) failed! err: %v",
 			filename, width, height, err)
 		return
 	}
@@ -107,7 +106,7 @@ func ResizeBytesImgToBytes(srcBytes []byte, filename string, width, height int, 
 	var srcImg image.Image
 	srcImg, err = imaging.Decode(reader)
 	if err != nil {
-		glog.Errorf("imaging.Decode(%s) failed! err: %v", filename, err)
+		log.Errorf("imaging.Decode(%s) failed! err: %v", filename, err)
 		return
 	}
 	img_bytes, err = ResizeImgToBytes(srcImg, filename, width, height, enlarge_smaller, quality)
@@ -117,7 +116,7 @@ func ResizeBytesImgToBytes(srcBytes []byte, filename string, width, height int, 
 func ResizeFileToFile(src string, dst string, width int, height int, enlarge_smaller bool, quality int) error {
 	srcImg, err := imaging.Open(src)
 	if err != nil {
-		glog.Errorf("Open Img File [%s] failed! err: %v", src, err)
+		log.Errorf("Open Img File [%s] failed! err: %v", src, err)
 		return err
 	}
 
@@ -128,7 +127,7 @@ func ResizeFileToFile(src string, dst string, width int, height int, enlarge_sma
 
 	err = ioutil.WriteFile(dst, dstImg, os.ModePerm)
 	if err != nil {
-		glog.Errorf("Save Img To File [%s] failed! err: %v", dst, err)
+		log.Errorf("Save Img To File [%s] failed! err: %v", dst, err)
 		return err
 	}
 	return nil
