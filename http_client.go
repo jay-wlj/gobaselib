@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/jay-wlj/gobaselib/log"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -15,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/jay-wlj/gobaselib/log"
 )
 
 func init() {
@@ -78,6 +79,23 @@ func headerstr(headers map[string]string) string {
 	return strings.Join(lines, " ")
 }
 
+func headertostring(headers http.Header) string {
+	if headers == nil {
+		return ""
+	}
+
+	lines := make([]string, len(headers))
+	for k, vs := range headers {
+		for _, v := range vs {
+			if k != "User-Agent" {
+				lines = append(lines, "-H'"+k+": "+v+"'")
+			}
+		}
+	}
+
+	return strings.Join(lines, " ")
+}
+
 var g_proxy_url string
 
 // proxyURL : "http://" + p.AppID + ":" + p.AppSecret + "@" + ProxyServer
@@ -110,6 +128,51 @@ func HttpReqDebug(method, uri string, body []byte, headers map[string]string, ma
 		req_debug = "curl -v -X " + method + " " + headerstr(headers) + " '" + uri + "' -d '" + debug_body + "' "
 	} else {
 		req_debug = "curl -v -X " + method + " " + headerstr(headers) + " '" + uri + "' "
+	}
+	return req_debug
+}
+
+func is_text_context_header(content_type string, headers http.Header) bool {
+	ok := content_type == "" || strings.HasPrefix(content_type, "text") ||
+		strings.HasPrefix(content_type, "application/json") ||
+		strings.HasPrefix(content_type, "application/x-www-form-urlencoded;charset=utf-8") ||
+		headers.Get("X-Body-Is-Text") == "1"
+	return ok
+}
+
+func HttpReqCurl(req *http.Request, max_body_len ...int) string {
+	maxBodyLen := 0
+	if len(max_body_len) > 0 {
+		maxBodyLen = max_body_len[0]
+	}
+	method := req.Method
+	var req_debug string
+
+	var err error
+	if upperMethod := strings.ToUpper(method); upperMethod == "PUT" || upperMethod == "POST" {
+		var req_body string
+		var body []byte
+
+		content_type := req.Header.Get("Content-Type")
+		if is_text_context_header(content_type, req.Header) {
+			body, err = ioutil.ReadAll(req.Body)
+			if err != nil {
+				log.Warnf("get request body error = %s\n", err.Error())
+				return ""
+			}
+			req.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+			if req.ContentLength == 0 || len(body) < maxBodyLen {
+				req_body = string(body)
+			} else {
+				req_body = string(body[0:maxBodyLen])
+			}
+		} else {
+			req_body = "[[not text body: " + content_type + "]]"
+		}
+		req_debug = "curl -v -X " + method + " " + headertostring(req.Header) + " '" + req.URL.String() + "' -d '" + req_body + "' "
+	} else {
+		req_debug = "curl -v -X " + method + " " + headertostring(req.Header) + " '" + req.URL.String() + "' "
 	}
 	return req_debug
 }
