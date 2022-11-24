@@ -355,3 +355,19 @@ func StringSliceToInt64Slice(vals []string) (vs []int64, err error) {
 	}
 	return
 }
+
+func StringSliceToUint64Slice(vals []string) (vs []uint64, err error) {
+	vs = []uint64{}
+	if vals == nil {
+		return
+	}
+
+	var n uint64
+	for _, v := range vals {
+		if n, err = strconv.ParseUint(v, 10, 64); err != nil {
+			return
+		}
+		vs = append(vs, n)
+	}
+	return
+}
