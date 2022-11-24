@@ -3,11 +3,12 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jay-wlj/gobaselib/log"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/jay-wlj/gobaselib/log"
 
 	redis "gopkg.in/redis.v5"
 )

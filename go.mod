@@ -8,14 +8,13 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/jie123108/imaging v1.1.0
-	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.9
 	github.com/levigross/grequests v0.0.0-20190908174114-253788527a1a
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsqio/go-nsq v1.0.7
-	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.19.0 // indirect
 	github.com/pkg/sftp v1.12.0
 	//github.com/shopspring/decimal v0.0.0-20191009025716-f1972eb1d1f5
@@ -30,5 +29,4 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/redis.v5 v5.2.9
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/gorm v1.23.5
 )
