@@ -371,3 +371,32 @@ func StringSliceToUint64Slice(vals []string) (vs []uint64, err error) {
 	}
 	return
 }
+
+func RemoveUint64Slice(vs, remove []uint64) []uint64 {
+	if len(remove) == 0 {
+		return vs
+	}
+	m := make(map[uint64]struct{})
+	for _, v := range remove {
+		m[v] = struct{}{}
+	}
+	var bNeedRemove bool
+	for _, v := range vs {
+		if _, ok := m[v]; ok {
+			bNeedRemove = true
+			break
+		}
+	}
+	if !bNeedRemove {
+		return vs
+	}
+
+	newIds := make([]uint64, 0, len(vs))
+	for _, v := range vs {
+		if _, ok := m[v]; ok {
+			continue
+		}
+		newIds = append(newIds, v)
+	}
+	return newIds
+}

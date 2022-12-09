@@ -2,6 +2,7 @@ package base
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -21,4 +22,8 @@ func TestRetag(t *testing.T) {
 
 	body, _ = json.Marshal(FilterStruct(&v, true, "user_id", "status"))
 	t.Log("body:", string(body))
+}
+
+func TestRemoveUint64Slice(t *testing.T) {
+	fmt.Println(RemoveUint64Slice([]uint64{1, 2, 3, 4, 10}, []uint64{1, 2, 4, 10}))
 }
