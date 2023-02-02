@@ -5,6 +5,7 @@ go 1.12
 //replace github.com/jay-wlj/gobaselib => ./
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.20.1
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.6.3
@@ -29,4 +30,6 @@ require (
 	gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22
 	gopkg.in/redis.v5 v5.2.9
 	gopkg.in/yaml.v2 v2.4.0
+	gorm.io/driver/mysql v1.4.5
+	gorm.io/gorm v1.24.3
 )

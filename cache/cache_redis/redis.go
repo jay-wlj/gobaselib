@@ -34,11 +34,11 @@ type redisCache struct {
 	redis.Cmdable
 }
 
-func NewClient(cfg *Config) (cache *redisCache, err error) {
-	var client = &redisCache{}
+func NewClient(cfg *Config) (client *redisCache, err error) {
+	client = &redisCache{}
 
 	if len(cfg.Nodes) == 0 {
-		return cache, errors.New("no redis nodes")
+		return client, errors.New("no redis nodes")
 	} else if len(cfg.Nodes) == 1 {
 		client.Cmdable = redis.NewClient(&redis.Options{
 			Network:  cfg.Network,
@@ -56,10 +56,10 @@ func NewClient(cfg *Config) (cache *redisCache, err error) {
 	}
 
 	var pong string
-	pong, err = cache.Ping(context.TODO()).Result()
+	pong, err = client.Ping(context.TODO()).Result()
 	if err != nil {
 		log.Error("NewredisCache(", cfg.Nodes, ",", cfg.DB, ") failed! pong:", pong, " err:", err)
-		cache = nil
+		client = nil
 		return
 	}
 
