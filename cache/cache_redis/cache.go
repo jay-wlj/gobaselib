@@ -30,11 +30,6 @@ func Init(cfg *Config) error {
 	return nil
 }
 
-func InitCmdable(cli redis.Cmdable) error {
-
-	return nil
-}
-
 func DefaultClient() *redisCache {
 	return defaultClient
 }
@@ -48,7 +43,12 @@ var errLockTimeout = errors.New("get redis lock timeout")
 //out: val interface{}, err error, cached string
 func CacheQuery(in []reflect.Value) []reflect.Value {
 	ctx, _ := in[0].Interface().(context.Context)
-	this, _ := in[1].Interface().(*redisCache)
+	this, ok := in[1].Interface().(*redisCache)
+	if !ok {
+		if cli, ok := in[1].Interface().(redis.Cmdable); ok {
+			this = &redisCache{Cmdable: cli}
+		}
+	}
 	cachekey, _ := in[2].Interface().(string)
 	exptime, _ := in[3].Interface().(time.Duration)
 	query_func := in[4]
@@ -125,7 +125,12 @@ func MakeCacheQuery(fptr interface{}) {
 //out: val interface{}, err error, cached string
 func HCacheQuery(in []reflect.Value) []reflect.Value {
 	ctx, _ := in[0].Interface().(context.Context)
-	this, _ := in[1].Interface().(*redisCache)
+	this, ok := in[1].Interface().(*redisCache)
+	if !ok {
+		if cli, ok := in[1].Interface().(redis.Cmdable); ok {
+			this = &redisCache{Cmdable: cli}
+		}
+	}
 	cachekey, _ := in[2].Interface().(string)
 	field, _ := in[3].Interface().(string)
 	exptime, _ := in[4].Interface().(time.Duration)
