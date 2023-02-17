@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/jay-wlj/gobaselib/cache/cache_redis/lock"
 	"github.com/jay-wlj/gobaselib/log"
 )
@@ -25,6 +26,11 @@ func Init(cfg *Config) error {
 		log.Warn("redis configuration error")
 		return err
 	}
+
+	return nil
+}
+
+func InitCmdable(cli redis.Cmdable) error {
 
 	return nil
 }

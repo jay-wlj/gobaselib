@@ -22,11 +22,12 @@ func init() {
 }
 
 type Config struct {
-	Network  string   `mapstructure:"network" toml:"network" json:"network,omitempty"`
-	Nodes    []string `mapstructure:"nodes" toml:"nodes" json:"nodes,omitempty"`
-	Username string   `mapstructure:"username" toml:"username" json:"username,omitempty"`
-	Password string   `mapstructure:"password" toml:"password" json:"password,omitempty"`
-	DB       int      `mapstructure:"db" toml:"db" json:"db,omitempty"`
+	Cli      redis.Cmdable `mapstructure:"-"` // 优先cli
+	Network  string        `mapstructure:"network" toml:"network" json:"network,omitempty"`
+	Nodes    []string      `mapstructure:"nodes" toml:"nodes" json:"nodes,omitempty"`
+	Username string        `mapstructure:"username" toml:"username" json:"username,omitempty"`
+	Password string        `mapstructure:"password" toml:"password" json:"password,omitempty"`
+	DB       int           `mapstructure:"db" toml:"db" json:"db,omitempty"`
 }
 
 type redisCache struct {
@@ -37,22 +38,26 @@ type redisCache struct {
 func NewClient(cfg *Config) (client *redisCache, err error) {
 	client = &redisCache{}
 
-	if len(cfg.Nodes) == 0 {
-		return client, errors.New("no redis nodes")
-	} else if len(cfg.Nodes) == 1 {
-		client.Cmdable = redis.NewClient(&redis.Options{
-			Network:  cfg.Network,
-			Addr:     cfg.Nodes[0],
-			Username: cfg.Username,
-			Password: cfg.Password,
-			DB:       cfg.DB,
-		})
+	if cfg.Cli != nil {
+		client.Cmdable = cfg.Cli
 	} else {
-		client.Cmdable = redis.NewClusterClient(&redis.ClusterOptions{
-			Addrs:    cfg.Nodes,
-			Username: cfg.Username,
-			Password: cfg.Password,
-		})
+		if len(cfg.Nodes) == 0 {
+			return client, errors.New("no redis nodes")
+		} else if len(cfg.Nodes) == 1 {
+			client.Cmdable = redis.NewClient(&redis.Options{
+				Network:  cfg.Network,
+				Addr:     cfg.Nodes[0],
+				Username: cfg.Username,
+				Password: cfg.Password,
+				DB:       cfg.DB,
+			})
+		} else {
+			client.Cmdable = redis.NewClusterClient(&redis.ClusterOptions{
+				Addrs:    cfg.Nodes,
+				Username: cfg.Username,
+				Password: cfg.Password,
+			})
+		}
 	}
 
 	var pong string

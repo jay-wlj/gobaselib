@@ -68,4 +68,6 @@ func TestUserCache(t *testing.T) {
 	fmt.Println(UserCacheQuery(ctx, client, "abc-10-20", 3*time.Second, getUserPage, 10, 20))
 	time.Sleep(time.Second)
 	fmt.Println(UserCacheQuery(ctx, client, "abc-10-20", 3*time.Second, getUserPage, 10, 20))
+
+	fmt.Println(client.Exists(ctx, "def").Result())
 }
