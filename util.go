@@ -400,3 +400,39 @@ func RemoveUint64Slice(vs, remove []uint64) []uint64 {
 	}
 	return newIds
 }
+
+func ContainInt(vs []int, val int) bool {
+	for _, v := range vs {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainUint(vs []uint, val uint) bool {
+	for _, v := range vs {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainUint64(vs []uint64, val uint64) bool {
+	for _, v := range vs {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainString(vs []string, val string) bool {
+	for _, v := range vs {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
