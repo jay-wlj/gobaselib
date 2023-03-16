@@ -100,9 +100,9 @@ func CacheQuery(in []reflect.Value) []reflect.Value {
 	// 缓存中未查询到, 查询回调函数.
 	values := query_func.Call(args)
 	val := values[0].Interface()
-	err, _ = values[1].Interface().(error)
+	err1, _ := values[1].Interface().(error)
 	//查询成功, 缓存结果, 用于下次查询.
-	if err == nil && val != nil {
+	if err == nil && err1 == nil && val != nil {
 		buf, err := json.Marshal(val)
 		if err == nil {
 			str = string(buf)
@@ -185,9 +185,9 @@ func HCacheQuery(in []reflect.Value) []reflect.Value {
 	// 缓存中未查询到, 查询回调函数.
 	values := query_func.Call(args)
 	val := values[0].Interface()
-	err, _ = values[1].Interface().(error)
+	err1, _ := values[1].Interface().(error)
 	//查询成功, 缓存结果, 用于下次查询.
-	if err == nil && val != nil {
+	if err == nil && err1 == nil && val != nil {
 		// buf, err := msgpack.Marshal(val)
 		buf, err := json.Marshal(val)
 		if err == nil {
