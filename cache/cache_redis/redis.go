@@ -269,9 +269,9 @@ func (t *redisCache) TryLock(ctx context.Context, key string, exptime time.Durat
 }
 
 func (t *redisCache) ZAddI64(ctx context.Context, key string, values []int64) (int64, error) {
-	members := []*redis.Z{}
+	members := []redis.Z{}
 	for i, v := range values {
-		members = append(members, &redis.Z{float64(i), v})
+		members = append(members, redis.Z{float64(i), v})
 	}
 	return t.Cmdable.ZAdd(ctx, key, members...).Result()
 }
