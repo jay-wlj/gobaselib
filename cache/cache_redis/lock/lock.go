@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	redis "github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v9"
 	"github.com/jay-wlj/gobaselib/log"
 )
 

@@ -10,7 +10,7 @@ import (
 	base "github.com/jay-wlj/gobaselib"
 	"github.com/jay-wlj/gobaselib/log"
 
-	redis "github.com/go-redis/redis/v8"
+	redis "github.com/go-redis/redis/v9"
 )
 
 var (
