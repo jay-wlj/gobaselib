@@ -102,7 +102,7 @@ func CacheQuery(in []reflect.Value) []reflect.Value {
 	val := values[0].Interface()
 	err1, _ := values[1].Interface().(error)
 	//查询成功, 缓存结果, 用于下次查询.
-	if err == nil && err1 == nil && val != nil {
+	if err1 == nil && val != nil {
 		buf, err := json.Marshal(val)
 		if err == nil {
 			str = string(buf)
@@ -187,7 +187,7 @@ func HCacheQuery(in []reflect.Value) []reflect.Value {
 	val := values[0].Interface()
 	err1, _ := values[1].Interface().(error)
 	//查询成功, 缓存结果, 用于下次查询.
-	if err == nil && err1 == nil && val != nil {
+	if err1 == nil && val != nil {
 		// buf, err := msgpack.Marshal(val)
 		buf, err := json.Marshal(val)
 		if err == nil {
