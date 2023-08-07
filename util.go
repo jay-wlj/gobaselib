@@ -71,67 +71,89 @@ func Int64ToInt(val int64) (value int, err error) {
 	return
 }
 
-func IntSliceToString(values []int, splite string) (strvalue string) {
+func IntSliceToString(values []int, splite string) string {
 	bfirst := true
+	builder := &strings.Builder{}
+	builder.Grow(len(values)*4 + len(values)*len(splite))
+
 	for _, value := range values {
 		if !bfirst {
-			strvalue += splite
+			builder.WriteString(splite)
 		} else {
 			bfirst = false
 		}
-		strvalue += IntToString(value)
+		builder.WriteString(strconv.Itoa(value))
 	}
-	return
+	return builder.String()
 }
 
 func UIntSliceToString(values []uint, splite string) (strvalue string) {
 	bfirst := true
+	builder := &strings.Builder{}
+	builder.Grow(len(values)*4 + len(values)*len(splite))
+
 	for _, value := range values {
 		if !bfirst {
-			strvalue += splite
+			builder.WriteString(splite)
 		} else {
 			bfirst = false
 		}
-		strvalue += UintToString(value)
+		builder.WriteString(UintToString(value))
 	}
 	return
 }
 
 func StringSliceToString(values []string, splite string) (strvalue string) {
 	bfirst := true
+	builder := &strings.Builder{}
+	var maxLen int
+	for _, v := range values {
+		if maxLen < len(v) {
+			maxLen = len(v)
+		}
+	}
+	builder.Grow(len(values)*maxLen + len(values)*len(splite))
+
 	for _, value := range values {
 		if !bfirst {
-			strvalue += splite
+			builder.WriteString(splite)
 		} else {
 			bfirst = false
 		}
-		strvalue += value
+		builder.WriteString(value)
 	}
 	return
 }
 
 func Int64SliceToString(values []int64, splite string) (strvalue string) {
 	bfirst := true
+	builder := &strings.Builder{}
+	builder.Grow(len(values)*4 + len(values)*len(splite))
+
 	for _, value := range values {
 		if !bfirst {
-			strvalue += splite
+			builder.WriteString(splite)
 		} else {
 			bfirst = false
 		}
-		strvalue += Int64ToString(value)
+		builder.WriteString(Int64ToString(value))
 	}
 	return
 }
 
 func Uint64SliceToString(values []uint64, splite string) (strvalue string) {
 	bfirst := true
+	builder := &strings.Builder{}
+	builder.Grow(len(values)*4 + len(values)*len(splite))
+
 	for _, value := range values {
 		if !bfirst {
-			strvalue += splite
+			builder.WriteString(splite)
 		} else {
 			bfirst = false
 		}
-		strvalue += Uint64ToString(value)
+
+		builder.WriteString(Uint64ToString(value))
 	}
 	return
 }
@@ -240,73 +262,73 @@ func IsEqual(f1, f2 float64) bool {
 
 // 通过map主键唯一的特性过滤重复元素
 func UniqueInt64Slice(slc []int64) []int64 {
-	result := []int64{}
-	tempMap := map[int64]bool{} // 存放不重复主键
+	result := make([]int64, 0, len(slc))
+	tempMap := map[int64]struct{}{} // 存放不重复主键
 	for _, e := range slc {
-		l := len(tempMap)
-		tempMap[e] = true
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e)
+		if _, ok := tempMap[e]; ok {
+			continue
 		}
+		tempMap[e] = struct{}{}
+		result = append(result, e)
 	}
 	return result
 }
 
 // 通过map主键唯一的特性过滤重复元素
 func UniqueUInt64Slice(slc []uint64) []uint64 {
-	result := []uint64{}
-	tempMap := map[uint64]bool{} // 存放不重复主键
+	result := make([]uint64, 0, len(slc))
+	tempMap := map[uint64]struct{}{} // 存放不重复主键
 	for _, e := range slc {
-		l := len(tempMap)
-		tempMap[e] = true
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e)
+		if _, ok := tempMap[e]; ok {
+			continue
 		}
+		tempMap[e] = struct{}{}
+		result = append(result, e)
 	}
 	return result
 }
 
 // 通过map主键唯一的特性过滤重复元素
 func UniqueStringSlice(slc []string) []string {
-	result := []string{}
-	tempMap := map[string]bool{} // 存放不重复主键
+	result := make([]string, 0, len(slc))
+	tempMap := map[string]struct{}{} // 存放不重复主键
 	for _, e := range slc {
 		if e == "" {
 			continue
 		}
-		l := len(tempMap)
-		tempMap[e] = true
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e)
+		if _, ok := tempMap[e]; ok {
+			continue
 		}
+		tempMap[e] = struct{}{}
+		result = append(result, e)
 	}
 	return result
 }
 
 // 通过map主键唯一的特性过滤重复元素
 func UniqueIntSlice(slc []int) []int {
-	result := []int{}
-	tempMap := map[int]bool{} // 存放不重复主键
+	result := make([]int, 0, len(slc))
+	tempMap := map[int]struct{}{} // 存放不重复主键
 	for _, e := range slc {
-		l := len(tempMap)
-		tempMap[e] = true
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e)
+		if _, ok := tempMap[e]; ok {
+			continue
 		}
+		tempMap[e] = struct{}{}
+		result = append(result, e)
 	}
 	return result
 }
 
 // 通过map主键唯一的特性过滤重复元素
 func UniqueUIntSlice(slc []uint) []uint {
-	result := []uint{}
+	result := make([]uint, 0, len(slc))
 	tempMap := map[uint]struct{}{} // 存放不重复主键
 	for _, e := range slc {
-		l := len(tempMap)
-		tempMap[e] = struct{}{}
-		if len(tempMap) != l { // 加入map后，map长度变化，则元素不重复
-			result = append(result, e)
+		if _, ok := tempMap[e]; ok {
+			continue
 		}
+		tempMap[e] = struct{}{}
+		result = append(result, e)
 	}
 	return result
 }
