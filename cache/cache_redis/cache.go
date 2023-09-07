@@ -103,10 +103,13 @@ func CacheQuery(in []reflect.Value) []reflect.Value {
 	err1, _ := values[1].Interface().(error)
 	//查询成功, 缓存结果, 用于下次查询.
 	if err1 == nil && val != nil {
-		buf, err := json.Marshal(val)
-		if err == nil {
-			str = string(buf)
-			this.Set(ctx, cachekey, str, exptime)
+		// val不为nil时才缓存数据
+		if !reflect.ValueOf(val).IsNil() {
+			buf, err := json.Marshal(val)
+			if err == nil {
+				str = string(buf)
+				this.Set(ctx, cachekey, str, exptime)
+			}
 		}
 	}
 
@@ -188,11 +191,13 @@ func HCacheQuery(in []reflect.Value) []reflect.Value {
 	err1, _ := values[1].Interface().(error)
 	//查询成功, 缓存结果, 用于下次查询.
 	if err1 == nil && val != nil {
-		// buf, err := msgpack.Marshal(val)
-		buf, err := json.Marshal(val)
-		if err == nil {
-			str = string(buf)
-			this.HSet(ctx, cachekey, field, str, exptime)
+		// val不为nil时才缓存数据
+		if !reflect.ValueOf(val).IsNil() {
+			buf, err := json.Marshal(val)
+			if err == nil {
+				str = string(buf)
+				this.HSet(ctx, cachekey, field, str, exptime)
+			}
 		}
 	}
 
