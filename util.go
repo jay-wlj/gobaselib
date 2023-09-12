@@ -87,7 +87,7 @@ func IntSliceToString(values []int, splite string) string {
 	return builder.String()
 }
 
-func UIntSliceToString(values []uint, splite string) (strvalue string) {
+func UIntSliceToString(values []uint, splite string) (string) {
 	bfirst := true
 	builder := &strings.Builder{}
 	builder.Grow(len(values)*4 + len(values)*len(splite))
@@ -100,10 +100,10 @@ func UIntSliceToString(values []uint, splite string) (strvalue string) {
 		}
 		builder.WriteString(UintToString(value))
 	}
-	return
+	return builder.String()
 }
 
-func StringSliceToString(values []string, splite string) (strvalue string) {
+func StringSliceToString(values []string, splite string) (string) {
 	bfirst := true
 	builder := &strings.Builder{}
 	var maxLen int
@@ -122,10 +122,10 @@ func StringSliceToString(values []string, splite string) (strvalue string) {
 		}
 		builder.WriteString(value)
 	}
-	return
+	return builder.String()
 }
 
-func Int64SliceToString(values []int64, splite string) (strvalue string) {
+func Int64SliceToString(values []int64, splite string) (string) {
 	bfirst := true
 	builder := &strings.Builder{}
 	builder.Grow(len(values)*4 + len(values)*len(splite))
@@ -138,10 +138,10 @@ func Int64SliceToString(values []int64, splite string) (strvalue string) {
 		}
 		builder.WriteString(Int64ToString(value))
 	}
-	return
+	return builder.String()
 }
 
-func Uint64SliceToString(values []uint64, splite string) (strvalue string) {
+func Uint64SliceToString(values []uint64, splite string) (string) {
 	bfirst := true
 	builder := &strings.Builder{}
 	builder.Grow(len(values)*4 + len(values)*len(splite))
@@ -155,7 +155,7 @@ func Uint64SliceToString(values []uint64, splite string) (strvalue string) {
 
 		builder.WriteString(Uint64ToString(value))
 	}
-	return
+	return builder.String()
 }
 func StringToIntSlice(str string, splite string) (ivalues []int) {
 	str = strings.TrimSpace(str)
