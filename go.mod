@@ -9,7 +9,7 @@ require (
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/fatih/structs v1.1.0
 	github.com/gin-gonic/gin v1.6.3
-	github.com/go-redis/redis/v9 v9.0.0-rc.2
+	github.com/redis/go-redis/v9 v9.0.3
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/jie123108/imaging v1.1.0
 	github.com/json-iterator/go v1.1.9
