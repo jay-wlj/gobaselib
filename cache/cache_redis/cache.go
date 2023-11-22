@@ -104,7 +104,7 @@ func CacheQuery(in []reflect.Value) []reflect.Value {
 	//查询成功, 缓存结果, 用于下次查询.
 	if err1 == nil && val != nil {
 		// val不为nil时才缓存数据
-		if !reflect.ValueOf(val).IsValid() {
+		if reflect.ValueOf(val).IsValid() {
 			buf, err := json.Marshal(val)
 			if err == nil {
 				str = string(buf)
@@ -192,7 +192,7 @@ func HCacheQuery(in []reflect.Value) []reflect.Value {
 	//查询成功, 缓存结果, 用于下次查询.
 	if err1 == nil && val != nil {
 		// val不为nil时才缓存数据
-		if !reflect.ValueOf(val).IsValid() {
+		if reflect.ValueOf(val).IsValid() {
 			buf, err := json.Marshal(val)
 			if err == nil {
 				str = string(buf)
